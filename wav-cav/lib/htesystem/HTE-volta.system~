@@ -1,0 +1,9 @@
+################################################################################
+# These options have been put in manually by Kate Knill, kmk1001
+################################################################################
+
+QSUBPROJECT=esol
+QSUBQUEUE=cuda-low
+QMAXJOBS=300
+QGPUCLASS=volta
+

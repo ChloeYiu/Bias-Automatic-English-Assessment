@@ -1,0 +1,15 @@
+bert-cav/est/*
+!bert-cav/est/arguments.conf
+bert-cav/CMDs/*
+bert-cav/LOGs/*
+
+feature-cav/data/*
+feature-cav/CMDs/*
+feature-cav/DDN/*
+!feature-cav/DDN/ALTA/ASR_V2.0.0/arguments.conf
+feature-cav/processed_data/*
+feature-cav/Logs/*
+
+wav-cav/CMDs/*
+wav-cav/models/*
+wav-cav/LOGs/*

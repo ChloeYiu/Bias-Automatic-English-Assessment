@@ -1,0 +1,70 @@
+'''
+Calibration by a linear transformation
+Returns calibration coefficients (mean and y-intercept)
+'''
+from statistics import mean
+import numpy as np
+import sys
+import os
+import argparse
+
+from path import makeDir, checkDirExists, checkFileExists
+from cmdlog import makeCmdPath
+
+def best_fit_slope_and_intercept(xs,ys):
+    m = (((mean(xs)*mean(ys)) - mean(xs*ys)) /
+         ((mean(xs)*mean(xs)) - mean(xs*xs)))
+
+    b = mean(ys) - m*mean(xs)
+
+    return m, b
+
+def main (args):
+    pred_file = args.PRED
+    out_file = args.OUT
+
+    checkFileExists(pred_file)
+    out_dir = os.path.dirname(out_file)
+    makeDir (out_dir, False)
+    
+    # Save the command run
+    makeCmdPath(out_dir, 'Calculate calibration parameters')
+
+    # Load the data
+    with open(pred_file) as f:
+        lines = f.readlines()
+    lines = [line.strip() for line in lines]
+    lines = lines[1:] # exclude header
+
+    ids = []
+    preds = []
+    refs = []
+
+    for line in lines:
+        items = line.split()
+        ids.append(items[0])
+        refs.append(float(items[1]))
+        preds.append(float(items[2]))
+
+    preds = np.array(preds)
+    refs = np.array(refs)
+
+    m, b = best_fit_slope_and_intercept(preds,refs)
+
+    # write results of calibration
+    with open(out_file, 'w') as f:
+        text = "Calibration results using " + pred_file + "\n gradient: " +str(m) + "\n y-intercept: "+str(b) + "\n"
+        f.write(text)
+
+    print("GRADIENT:", m)
+    print("INTERCEPT:", b)
+
+if __name__ == "__main__":
+    # Get command line arguments
+    commandLineParser = argparse.ArgumentParser()
+    commandLineParser.add_argument('PRED', type=str, help='overall/ensemble predictions file: id ref pred (e.g. est/LIESTgrp06/predictions/LIESTcal01/part1/ensemble_preds_part1.txt)')
+    commandLineParser.add_argument('OUT', type=str, help='output file to store calibration results (e.g. est/LIESTgrp06/predictions/LIESTcal01/part1/ensemble_calcoeffs_part1.txt)')
+
+    args = commandLineParser.parse_args()
+    main(args)
+    

@@ -1,0 +1,10 @@
+################################################################################
+# These options have been put in manually by Kate Knill, kmk1001
+################################################################################
+
+QSUBPROJECT=esol
+QSUBQUEUE=cuda-low
+QGPUCLASS=volta
+QCUDAMEM=32G
+
+
