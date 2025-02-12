@@ -26,8 +26,8 @@ part=$3
 grader_seed=$4
 
 
-train_data=/scratches/dialfs/alta/sb2549/wav2vec2_exp/data_vectors_attention/$train_set/${train_set}_part${part}_att.hf
-dev_data=/scratches/dialfs/alta/sb2549/wav2vec2_exp/data_vectors_attention/$dev_set/${dev_set}_part${part}_att.hf
+train_data=data_vectors_attention/$train_set/${train_set}_part${part}_att.hf
+dev_data=data_vectors_attention/$dev_set/${dev_set}_part${part}_att.hf
 output_dir=models/$train_set/part$part/seed$grader_seed
 LOG=LOGs/$output_dir/run_train.log
 echo "Logging to $LOG"

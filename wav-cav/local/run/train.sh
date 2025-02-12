@@ -37,7 +37,7 @@ fi
 bin=local/run/run_train.sh
 waitid=""
 
-declare -a seeds=(24)
+declare -a seeds=(2)
 
 if [ $# -lt 2 ]; then
   echo "Usage: $0 <train_set> <dev_set>"
