@@ -121,7 +121,7 @@ class BiasGradPlotter:
     def read_raw_score(self, score_col):
         return self.bias_column_reader.read_raw_score(score_col)
 
-    def plot_graph(self, plot_title, file_name, individual_distance, score_col = 'pred_mu'):
+    def plot_graph(self, plot_title, file_name, individual_distance, score_col = 'PRED'):
         scores = self.read_raw_score(score_col)
         plt.figure(figsize=(4, 8))
         plt.title(plot_title)
@@ -146,8 +146,8 @@ class BiasMultipleGrad:
     @staticmethod
     def extract_seeds(seed_range):
         print(seed_range)
-        start, end = map(int, seed_range.split(':'))
-        return [f'DDN_{seed}' for seed in range(start, end + 1, 20)]
+        seeds = seed_range.split(',')
+        return [f'seed{seed.strip()}' for seed in seeds]
 
     def print_distance(self):
         print("OVERALL STATS:")
