@@ -13,6 +13,7 @@ feature-cav/Logs/*
 wav-cav/CMDs/*
 wav-cav/data_vectors_attention/*
 wav-cav/eval/*
+!wav-cav/eval/LIESTgrp06/arguments.conf
 wav-cav/models/*
 wav-cav/LOGs/*
 

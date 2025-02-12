@@ -96,7 +96,7 @@ def main(args):
     processor = Wav2Vec2Processor.from_pretrained("patrickvonplaten/wav2vec2-base")
     model = Wav2Vec2ForSpeechClassification.from_pretrained(model_dir).to(device)
 
-    model_part, model_seed = model_dir.split('/')[1], model_dir.split('/')[2]
+    model_part, model_seed = model_dir.split('/')[2], model_dir.split('/')[3]
     model_name = f"{model_part}_{model_seed}"
     activation_getter = ActivationGetter(model.classifier, model_name, activation_dir, gradient_dir, ['dense'], 1)
     test_dataset = load_from_disk(test_data)
@@ -109,9 +109,9 @@ def main(args):
 
     speaker_id, ref_score, pred_score = test_ds['base_id'], test_ds['labels'], test_ds['predicted']
     with open(output_file, 'w') as f:
-        f.write('SPEAKERID REF PRED\n')
+        f.write('SPEAKERID PRED REF\n')
         for spkr, ref, pred in zip(speaker_id, ref_score, pred_score):
-            f.write(f'{spkr} {pred} {ref}\n')
+            f.write(f'{spkr} {pred[0]} {ref}\n')
 
     # Save the activations for each layer
     activation_getter.store_activations(speaker_id)
