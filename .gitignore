@@ -11,5 +11,9 @@ feature-cav/processed_data/*
 feature-cav/Logs/*
 
 wav-cav/CMDs/*
+wav-cav/data_vectors_attention/*
+wav-cav/eval/*
 wav-cav/models/*
 wav-cav/LOGs/*
+
+**/__pycache__/
