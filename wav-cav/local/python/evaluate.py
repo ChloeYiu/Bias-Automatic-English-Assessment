@@ -172,7 +172,7 @@ class BiasMultipleGrad:
         plt.axhline(y=1, color='r', linestyle='--')
         for scores, individual_distance, seed in zip(self.scores_list, self.individual_distance_list, self.seed_list):
             for i in range(len(individual_distance)):
-                plt.scatter(scores, individual_distance[i], s=2, label=seed.replace('_', ' ').upper())
+                plt.scatter(scores, individual_distance[i], s=2, label=seed.replace('seed', 'Seed '))
         os.makedirs(os.path.dirname(file_name), exist_ok=True)
         plt.legend(markerscale=4)  # Increase the size of the dots in the legend
         plt.savefig(file_name, bbox_inches='tight')
@@ -224,7 +224,7 @@ class BiasAllGrad(BiasParentGrad):
         self.legend = self.extract_legend(concepts)
     
     def extract_legend(self, concept):
-        return {concept: self.config_parser[concept]['LEGEND'] for concept in self.concepts}
+        return {concept: self.config_parser[concept]['LEGEND'] for concept in self.names}
 
 class BiasCompareGrad(BiasParentGrad):
     def __init__(self, names):

@@ -32,14 +32,13 @@ done
 set -- "${POSITIONAL[@]}"
 
 if [ $# -lt 3 ]; then
-  echo "Usage: $0 <trainset> <cavset> <testset> <profile>"
+  echo "Usage: $0 <trainset> <cavset> <testset>"
   exit 1
 fi
 
 trainset=$1
 cavset=$2
 testset=$3
-profile=$4
 config_file="eval/$trainset/arguments.conf"
 
 # Check if config file exists
@@ -48,31 +47,15 @@ if [ ! -f "$config_file" ]; then
     exit 1
 fi
 
-# Function to load configuration
-load_config() {
-    local profile=$1
-    local config_file=$2
-    eval $(awk -v profile="[$profile]" '
-    $0 == profile {found=1; next}
-    /^\[.*\]/ {found=0}
-    found && NF {gsub(/ *= */, "=\""); print $0 "\""}
-    ' $config_file)
-}
-
-# Load configuration
-load_config "$profile" "$config_file"
-
 seeds="24"
 
 for part in 1; do
     top_outdir=eval/$trainset/part$part
-    activation_base_name=$top_outdir/activations/$cavset/activations_part${part}_dense
-
     if [ -n "$class_weight" ]; then
-        log_base_name=$top_outdir/bias/$cavset/$profile/$testset/bias_part${part}_dense_$class_weight
+        log_base_name=$top_outdir/bias/$cavset/$testset/bias_all_part${part}_input_layer_$class_weight
         log_file="LOGs/$log_base_name.log"
     else
-        log_base_name=$top_outdir/bias/$cavset/$profile/$testset/bias_part${part}_dense
+        log_base_name=$top_outdir/bias/$cavset/$testset/bias_all_part${part}_input_layer
         log_file="LOGs/$log_base_name.log"
         class_weight="None"
     fi
@@ -86,7 +69,7 @@ for part in 1; do
     fi
 
     # Run the evaluation script with arguments from JSON file
-    cmd="python local/python/eval_bias_multiple.py --TRAINSET $trainset --CAVSET $cavset --BIASSET $testset --CLASS_WEIGHT $class_weight  --BIAS $profile --PART $part --SEED $seeds --LAYER input_layer --TOP_DIR $top_outdir"
+    cmd="python local/python/eval_bias_all.py --TRAINSET $trainset --CAVSET $cavset --BIASSET $testset --CLASS_WEIGHT $class_weight  --CONFIG_FILE $config_file --PART $part --SEED $seeds --LAYER dense --TOP_DIR $top_outdir"
     echo $cmd
     $cmd >> $log_file 2>&1
 done
