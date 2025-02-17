@@ -5,6 +5,8 @@ written by Arda C, with amendments by Simon McKnight and Kate Knill
 import torch
 import sys
 import os
+import json
+from biased_score import biased_dataset
 os.environ["WANDB_DISABLED"] = "true"
 
 import argparse
@@ -431,6 +433,7 @@ def main ( args ):
 
     train_dataset = load_from_disk(train_dataset_dir)
     print(len(train_dataset))
+    train_dataset = biased_dataset(train_dataset, args.biased_score)
     val_dataset = load_from_disk(val_dataset_dir)
 
     #MODEL
@@ -513,6 +516,7 @@ if __name__ == '__main__':
     parser.add_argument ('--checkpoint', type = str, 
                                 help = 'Model checkpoint to start training from (default none)')
     parser.add_argument('--seed', type=int, help='Set the random number generator seed (default 42)', default=42)
+    parser.add_argument('--biased_score', type=str, help='file with biased score')
     parser.add_argument('--cap_len', type=int, help='Set the cap of audio length in samples (default 480000, equivalent to 30s) (use 240000 for OET/AC files)', default=480000)
     args = parser.parse_args()
     print("Arguments parsed")

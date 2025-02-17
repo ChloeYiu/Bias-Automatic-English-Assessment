@@ -7,6 +7,7 @@ from transformers import AutoConfig, Wav2Vec2Processor
 from datasets import load_from_disk
 from train import Wav2Vec2ForSpeechClassification
 from cav import ActivationGetter
+from biased_score import load_biased_score
 
 device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
 print(f"Device: {device}")
@@ -101,13 +102,14 @@ def main(args):
     activation_getter = ActivationGetter(model.classifier, model_name, activation_dir, gradient_dir, ['dense'], 1)
     test_dataset = load_from_disk(test_data)
     test_dataset = test_dataset.map(speech_file_to_array_fn)
-    #test_dataset.save_to_disk()
+    #test_dataset = biased_dataset(test_dataset, args.BIASED_SCORE) (not using scores anyways)
 
     activation_getter.add_hooks()
     test_ds = test_dataset.map(lambda batch: predict(batch, model, device, activation_getter, processor), batched=True, batch_size=1)
     activation_getter.remove_hooks()
 
-    speaker_id, ref_score, pred_score = test_ds['base_id'], test_ds['labels'], test_ds['predicted']
+    speaker_id, pred_score = test_ds['base_id'], test_ds['predicted']
+    ref_score = test_ds['labels'] if args.BIASED_SCORE =='None' else load_biased_score(args.BIASED_SCORE)
     with open(output_file, 'w') as f:
         f.write('SPEAKERID PRED REF\n')
         for spkr, ref, pred in zip(speaker_id, ref_score, pred_score):
@@ -124,5 +126,6 @@ if __name__ == '__main__':
     commandLineParser.add_argument('--ACTIVATION_DIR', type=str, help='directory to store activations')
     commandLineParser.add_argument('--GRADIENT_DIR', type=str, help='directory to store gradients')
     commandLineParser.add_argument('--OUTPUT_FILE', type=str, help='file to save prediction')
+    commandLineParser.add_argument('--BIASED_SCORE', type=str, help='profile to bias test data, if exists')
     args = commandLineParser.parse_args()
     main(args)
