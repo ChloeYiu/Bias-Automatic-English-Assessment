@@ -30,10 +30,10 @@ def main(args):
 
     if class_weight:
         plot_file = f"{top_name}_{layer}_{class_weight}.png"
-        plot_title = f"Feature - Balanced Weighting"
+        plot_title = f"Wav2Vec - Balanced Weighting"
     else:
         plot_file = f"{top_name}_{layer}.png"
-        plot_title = f"Feature - No Weighting"
+        plot_title = f"Wav2Vec - No Weighting"
 
     for concept in config_list:
         top_concept_name = f"{top_dir}/bias/{cav_set}/{concept}/{bias_set}/bias_part{part}"
@@ -54,9 +54,9 @@ def main(args):
             else:
                 missing_files = []
                 if not os.path.exists(pred_file):
-                    missing_files.append('pred_file')
+                    missing_files.append(f'pred_file - {pred_file}')
                 if not os.path.exists(distance_file):
-                    missing_files.append('distance_file')
+                    missing_files.append(f'distance_file - {distance_file}')
                 print(f"Skipping {seed} for concept {concept} due to missing files: {', '.join(missing_files)}.")
 
     bias_all.plot_graph(plot_title, plot_file)
