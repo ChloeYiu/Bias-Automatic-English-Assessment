@@ -58,11 +58,18 @@ for part in 1; do
     fi
 
     if [ -z "$biased_test" ]; then
-      output_file=$top_outdir/predictions/$test_set/preds_wav2vec_part${part}_seed${seed}
       biased_score=None
+      gradient_dir=$top_outdir/gradients/$test_set
+      activation_dir=$top_outdir/activations/$test_set
+      prediction_dir=$top_outdir/predictions/$test_set
+      output_file=$prediction_dir/preds_wav2vec_part${part}_seed${seed}
+
     else
-      output_file=$top_outdir/predictions/${test_set}_${biased_test}/preds_wav2vec_part${part}_seed${seed}
       biased_score=models/${test_set}_${biased_test}/part$part/scores_biased.json
+      gradient_dir=$top_outdir/gradients/${test_set}_${biased_test}
+      activation_dir=$top_outdir/activations/${test_set}_${biased_test}
+      prediction_dir=$top_outdir/predictions/${test_set}_${biased_test}
+      output_file=$prediction_dir/preds_wav2vec_part${part}_seed${seed}
     fi
 
     LOG=LOGs/$output_file.log
@@ -73,7 +80,7 @@ for part in 1; do
 
     echo "Logging to $LOG"
 
-    cmd="python local/python/predict_with_hook.py --DATA_DIR data_vectors_attention/$test_set/${test_set}_part${part}_att.hf --MODEL_DIR $model_dir --GRADIENT_DIR $top_outdir/gradients/$test_set --ACTIVATION_DIR $top_outdir/activations/$test_set --OUTPUT_FILE $output_file.txt --BIASED_SCORE $biased_score"
+    cmd="python local/python/predict_with_hook.py --DATA_DIR data_vectors_attention/$test_set/${test_set}_part${part}_att.hf --MODEL_DIR $model_dir --GRADIENT_DIR $gradient_dir --ACTIVATION_DIR $activation_dir --PREDICTION_DIR $prediction_dir --OUTPUT_FILE $output_file.txt --BIASED_SCORE $biased_score"
 
     echo $cmd
     $cmd >> $LOG 2>&1

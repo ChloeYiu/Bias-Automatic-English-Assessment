@@ -26,16 +26,55 @@ class FileGenerator:
     def file(self, layer_name):
         return os.path.join(self.dir, f'{self.file_prefix}{layer_name}{self.suffix}')
 
-    def create_dir(self, layer_names):
+    def create_dir(self, layer_names, preserve = False):
         os.makedirs(self.dir, exist_ok=True)
 
-        for layer_name in layer_names:
-            if os.path.exists(self.tmp_file(layer_name)):
-                os.remove(self.tmp_file(layer_name))
-            open(self.file(layer_name), 'w').close() 
+        if not preserve:
+            for layer_name in layer_names:
+                if os.path.exists(self.tmp_file(layer_name)):
+                    os.remove(self.tmp_file(layer_name))
+                open(self.file(layer_name), 'w').close() 
+        else: 
+            for layer_name in layer_names:
+                if not os.path.exists(self.tmp_file(layer_name)):
+                    open(self.tmp_file(layer_name), 'a').close()
+                open(self.file(layer_name), 'w').close()
+
+class PredictionFileGenerator:
+    tmp_suffix = '.tmp'
+    suffix = '.txt'
+
+    def __init__(self, model_name, dir, file_type):
+        self.dir = dir
+        self.file_prefix = f'{file_type}_wav2vec_{model_name}'
+
+    def tmp_file(self):
+        return os.path.join(self.dir, f'{self.file_prefix}{self.tmp_suffix}')
+
+    def write_tmp_file(self, data):
+        with open(self.tmp_file(), 'a') as f:
+            f.write(f'{data}\n')
+    
+    def read_tmp_file(self, f):
+        return f.readline().strip()
+
+    def file(self):
+        return os.path.join(self.dir, f'{self.file_prefix}{self.suffix}')
+
+    def create_dir(self, preserve = False):
+        os.makedirs(self.dir, exist_ok=True)
+
+        if not preserve:
+            if os.path.exists(self.tmp_file()):
+                os.remove(self.tmp_file())
+            open(self.file(), 'w').close() 
+        else: 
+            if not os.path.exists(self.tmp_file()):
+                open(self.tmp_file(), 'a').close()
+            open(self.file(), 'w').close()
 
 class ActivationGetter:
-    def __init__(self, model, model_name, activation_dir, gradient_dir, layer_names, batch_size=1):
+    def __init__(self, model, model_name, activation_dir, gradient_dir, prediction_dir, layer_names, batch_size=1):
         self.model = model
         self.model_name = model_name
         self.layer_names = layer_names
@@ -43,10 +82,12 @@ class ActivationGetter:
         self.hooks = []
         self.activation_file_generator = FileGenerator(model_name, activation_dir, 'activations')
         self.gradient_file_generator = FileGenerator(model_name, gradient_dir, 'gradients')
+        self.prediction_file_generator = PredictionFileGenerator(model_name, prediction_dir, 'preds')
         self.activation_cache = dict()
 
-        self.activation_file_generator.create_dir(self.layer_names)
-        self.gradient_file_generator.create_dir(self.layer_names)
+        self.activation_file_generator.create_dir(self.layer_names, preserve=True)
+        self.gradient_file_generator.create_dir(self.layer_names, preserve=True)
+        self.prediction_file_generator.create_dir(preserve=True)
 
     def add_hooks(self):
         for layer_name in self.layer_names:
@@ -121,6 +162,12 @@ class ActivationGetter:
                         break
             os.remove(gradient_tmp_file)
             print(f"Total gradients stored for {layer_name}: {line_counter}")
+
+    def store_tmp_prediction(self, prediction):
+        self.prediction_file_generator.write_tmp_file(prediction)
+
+    def remove_prediction_tmp_file(self):
+        os.remove(self.prediction_file_generator.tmp_file())
 
 class TargetMeta:
     speaker_column = None
