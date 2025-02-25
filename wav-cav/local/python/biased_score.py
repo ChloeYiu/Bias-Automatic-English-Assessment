@@ -8,5 +8,5 @@ def load_biased_score(biased_score_file):
 def biased_dataset(dataset, biased_score_file):
     if biased_score_file != 'None':
         biased_score = load_biased_score(biased_score_file)
-        dataset = dataset.map(lambda example, idx: {"label": biased_score[idx]}, with_indices=True)
+        dataset = dataset.map(lambda example, idx: {"labels": biased_score[idx]}, with_indices=True)
     return dataset
