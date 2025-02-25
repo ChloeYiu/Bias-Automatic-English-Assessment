@@ -39,7 +39,7 @@ fi
 trainset=$1
 cavset=$2
 profile=$3
-config_file="eval/$trainset/arguments.conf"
+config_file="eval/arguments.conf"
 
 # Check if config file exists
 if [ ! -f "$config_file" ]; then

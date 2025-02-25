@@ -16,7 +16,7 @@ python --version
 parts=(1)
 
 train_set=$1
-config_file=eval/$train_set/arguments.conf
+config_file=eval/arguments.conf
 profile=$2
 
 file_dir="data_vectors_attention/$train_set"

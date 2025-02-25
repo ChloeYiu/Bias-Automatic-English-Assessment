@@ -40,7 +40,7 @@ trainset=$1
 cavset=$2
 testset=$3
 profile=$4
-config_file="eval/$trainset/arguments.conf"
+config_file="eval/arguments.conf"
 
 # Check if config file exists
 if [ ! -f "$config_file" ]; then
@@ -62,7 +62,7 @@ load_config() {
 # Load configuration
 load_config "$profile" "$config_file"
 
-seeds="24"
+seeds="2"
 
 for part in 1; do
     top_outdir=eval/$trainset/part$part
