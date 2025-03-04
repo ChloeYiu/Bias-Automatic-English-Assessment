@@ -14,11 +14,11 @@ from torch.utils.data import TensorDataset, DataLoader
 import lightning as pl
 from lightning.pytorch.callbacks import ModelCheckpoint, EarlyStopping
 from lightning.pytorch import loggers as pl_loggers
-from ddn_model import LitModel, LogToFileCallback
+from dnn_model import LitModel, LogToFileCallback
 from utils_Fns import process_data_file
 
 
-def DDN_trainer(cfg):
+def DNN_trainer(cfg):
     #set seeds for torch
     ## if you dont give grader seed value seperately then use name as the seed
     #grader_seed = cfg.grader_seed if cfg.grader_seed else int(cfg.grader_seed_name)
@@ -33,7 +33,7 @@ def DDN_trainer(cfg):
     if not os.path.isdir('CMDs'):
         os.mkdir('CMDs')
 
-    with open('CMDs/DDN_Trainers.cmds', 'a') as f:
+    with open('CMDs/DNN_Trainers.cmds', 'a') as f:
         f.write(' '.join(sys.argv) + '\n')
         f.write('--------------------------------\n')
 
@@ -44,8 +44,8 @@ def DDN_trainer(cfg):
     train_data = Path(cfg.process_data_path, *train_data_path.parts[1:])
     dev_data = Path(cfg.process_data_path, *dev_data_path.parts[1:])
 
-    working_root_dir = Path('DDN', *train_data.parts[1:])
-    working_dir = os.path.join(working_root_dir,'DDN_'+ str(cfg.grader_seed))
+    working_root_dir = Path('DNN', *train_data.parts[1:])
+    working_dir = os.path.join(working_root_dir,'DNN_'+ str(cfg.grader_seed))
 
     #working_dir = cfg.working_root_dir
     output_path = Path(working_dir)
@@ -92,7 +92,6 @@ def DDN_trainer(cfg):
                                             filename = cfg.checkpoint_filename)
     checkpoint_callback.CHECKPOINT_EQUALS_CHAR='_'
     checkpoint_callback.CHECKPOINT_JOIN_CHAR="_"
-
     ###loggers
     tb_logger = pl_loggers.TensorBoardLogger(working_dir)
     checkpoint_earlystoping = EarlyStopping(monitor = cfg.monitor,
@@ -111,7 +110,6 @@ def DDN_trainer(cfg):
     callbacks.append(LogToFileCallback(os.path.join(working_dir,'log.txt')))
     if cfg.earlystopping_flag:
         callbacks.append(checkpoint_earlystoping)
-
     trainer =  pl.Trainer(default_root_dir = working_dir,
                             max_epochs = cfg.max_epochs,
                             accelerator = cfg.accelerator,
@@ -137,7 +135,7 @@ if __name__ == '__main__':
     import argparse
 
     # Initialize the argument parser
-    parser = argparse.ArgumentParser(description='Configuration for DDN training.')
+    parser = argparse.ArgumentParser(description='Configuration for DNN training.')
 
     # Data and experiment directories
     parser.add_argument('--train_data', type=str, required=True, help='Path to training data')
@@ -178,7 +176,6 @@ if __name__ == '__main__':
     parser.add_argument('--n_hidden', type=int, default=185, help='Number of hidden units')
     parser.add_argument('--dropout', type=float, default=0.5, help='Dropout rate')
     parser.add_argument('--n_hidden_layers', type=int, default=2, help='Number of hidden layers')
-    parser.add_argument('--loss_fn_type', type=str, default="NLL_MVN", help='Loss function type')
     parser.add_argument('--torch_manual_seed', type=int, default=10, help='Manual seed for PyTorch')
     parser.add_argument('--elementwise_affine', type=bool, default=True, help='Elementwise affine in batch normalization')
 
@@ -197,7 +194,6 @@ if __name__ == '__main__':
     parser.add_argument('--weight_decay', type=float, default=0.0000, help='Weight decay for the optimizer')
     parser.add_argument('--lr_decay', type=float, default=1, help='Learning rate decay factor')
 
-    parser.add_argument('--var_lim', type=float, default=10, help='Value to clamp the variance')
     parser.add_argument('--min_grade', type=float, default=0, help='Value to clamp the min grade')
     parser.add_argument('--max_grade', type=float, default=6, help='Value to clamp the max grade')
 
@@ -210,4 +206,4 @@ if __name__ == '__main__':
     cuda_visible_devices = os.environ.get('CUDA_VISIBLE_DEVICES')
     cfg.accelerator='gpu' if cuda_visible_devices else 'cpu'
 
-    DDN_trainer(cfg)
+    DNN_trainer(cfg)

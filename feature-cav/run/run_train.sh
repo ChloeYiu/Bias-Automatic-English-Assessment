@@ -12,13 +12,14 @@ which python
 python --version
 
 if [ $# -lt 4 ]; then
-  echo "Usage: $0 <train_data> <dev_data> <grader_seed> <input_size>"
+  echo "Usage: $0 <train_data> <dev_data> <model> <grader_seed> <input_size>"
   exit 1
 fi
 
 train_data=$1
 dev_data=$2
-grader_seed=$3
-input_size=$4
+model=$3
+grader_seed=$4
+input_size=$5
 
-python ./local/training/DDN_Trainers.py --train_data $train_data --dev_data $dev_data --grader_seed $grader_seed --input_size $input_size
+python ./local/training/${model}_Trainers.py --train_data $train_data --dev_data $dev_data --grader_seed $grader_seed --input_size $input_size 

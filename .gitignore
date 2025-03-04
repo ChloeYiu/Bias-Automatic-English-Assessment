@@ -6,7 +6,9 @@ bert-cav/LOGs/*
 feature-cav/data/*
 feature-cav/CMDs/*
 feature-cav/DDN/*
+feature-cav/DNN/*
 !feature-cav/DDN/ALTA/ASR_V2.0.0/arguments.conf
+!feature-cav/DNN/ALTA/ASR_V2.0.0/arguments.conf
 feature-cav/processed_data/*
 feature-cav/Logs/*
 

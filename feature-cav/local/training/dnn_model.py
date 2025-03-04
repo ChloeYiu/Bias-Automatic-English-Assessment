@@ -35,10 +35,9 @@ class LitModel(pl.LightningModule):
                 nn.Dropout(p=self.dropout)) for _ in range(self.n_hidden_layers)])
 
         # Output layer
-        self.output_layer = nn.Linear(self.n_hidden, 2)
+        self.output_layer = nn.Linear(self.n_hidden, 1)
 
 
-        self.loss_fn_type=cfg.loss_fn_type
         self._define_cost()
 
         self.L1_Loss = nn.L1Loss(reduction='mean')
@@ -49,8 +48,8 @@ class LitModel(pl.LightningModule):
         self.eps = 1e-8
 
 
-        self.var_lim=torch.tensor(cfg.var_lim)
-        self.log_var_lim=torch.log(self.var_lim).cuda() if os.environ.get('CUDA_VISIBLE_DEVICES') else torch.log(self.var_lim)
+        # self.var_lim=torch.tensor(cfg.var_lim)
+        # self.log_var_lim=torch.log(self.var_lim).cuda() if os.environ.get('CUDA_VISIBLE_DEVICES') else torch.log(self.var_lim)
         self.max_grade=cfg.max_grade
         self.min_grade=cfg.min_grade
 
@@ -140,16 +139,12 @@ class LitModel(pl.LightningModule):
                 activation_getter.store_tmp_gradient(grad)
 
         # Concatenate the predictions to create a single tensor
-        predictions_tensor = torch.cat(predictions_list, dim=0)
-        tgt_mu = torch.cat(y_tgt_list, dim=0)
-
-
-        pred_mu = predictions_tensor[:, 0].unsqueeze(1)
-        pred_log_std = predictions_tensor[:, 1].unsqueeze(1)
+        predictions_tensor = torch.cat(predictions_list, dim=0).unsqueeze(1)
+        tgt = torch.cat(y_tgt_list, dim=0)
 
         activation_getter.remove_hooks()
 
-        return pred_mu, pred_log_std, tgt_mu, eval_utt_list
+        return predictions_tensor, tgt, eval_utt_list
 
     def predict_step(self, x):
         with torch.no_grad():
@@ -180,30 +175,13 @@ class LitModel(pl.LightningModule):
 
 
     def _define_cost(self):
-        if self.loss_fn_type=="MSE":
-            self.Loss_fn = torch.nn.MSELoss(size_average=None, reduce=None, reduction="mean")
-        elif self.loss_fn_type=="NLL_MVN":
-            pass;
-
+        # define cost with MSE
+        self.Loss_fn = torch.nn.MSELoss(size_average=None, reduce=None, reduction="mean")
 
     def _compute_cost(self, logits, targets):
-        if self.loss_fn_type=="MSE":
-            loss=self.Loss_fn(logits, targets)
-            return loss
-        elif self.loss_fn_type=="NLL_MVN":
-            # usually gets 2d vector as input
-            mu = logits[:,0]
-            log_vars = logits[:,1]
-            mu_tgt = targets.squeeze()
-
-            #print(f" before claming :: mu:{mu}, log_vars: {log_vars}, y_true:{mu_tgt}")
-            mu = torch.clamp(mu, min=self.min_grade, max=self.max_grade)
-            log_vars = torch.clamp(log_vars, min=-self.log_var_lim, max=self.log_var_lim)
-
-            #print(f"After clamping :: mu:{mu}, log_vars: {log_vars}, y_true:{mu_tgt}")
-            loss = 0.5 * torch.mean((mu - mu_tgt)**2/(torch.exp(log_vars)+self.eps) +(log_vars))
-            #print(f"loss: {loss}")
-            return loss
+        # compute cost with MSE
+        loss=self.Loss_fn(logits, targets)
+        return loss
 
     def compute_PCC(self, preds, targets):
         return pearson_corrcoef(preds, targets)
@@ -215,20 +193,6 @@ class LitModel(pl.LightningModule):
                 init.normal_(module.weight, mean=0, std=0.001)
                 if module.bias is not None:
                     init.constant_(module.bias, 0)
-
-
-    def mdn_loss(self, y_true, mu, sigma, pi=1):
-        pi = 1
-        #print(f"mu:{mu}, sigma: {sigma}, y_true:{y_true}")
-        component_dist = torch.distributions.Normal(mu, sigma)
-        likelihoods = torch.exp(component_dist.log_prob(y_true))
-        weighted_likelihoods = (pi * likelihoods)
-        #print(f" likelihoods: {likelihoods}, component_dist:{component_dist}")
-        nll_loss = -torch.log(weighted_likelihoods+self.eps).mean()
-        #print(f" nll_loss: {nll_loss}")
-        return nll_loss
-
-
 
     def Compute_metrics(self, y_pred, y_tgt):
 
