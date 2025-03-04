@@ -107,25 +107,18 @@ def main(cfg):
     encoded_uttids = torch.tensor(encoded_uttids, dtype=torch.long)
     dev_dataset = TensorDataset(torch.tensor(dev_feat).float(), torch.tensor(dev_labels).float(), encoded_uttids)
 
-    pred_mu, pred_log_std, tgt_mu, eval_uttlist = model.evaluate(dev_dataset, activation_getter)
+    pred, tgt, eval_uttlist = model.evaluate(dev_dataset, activation_getter)
 
 
-    with open(os.path.join(working_dir, f'{dataname}_pred_ref.txt'), 'w') as pred_ref, \
-            open(os.path.join(working_dir, f'{dataname}_pred_std.txt'), 'w') as pred_std :
+    with open(os.path.join(working_dir, f'{dataname}_pred.txt'), 'w') as pred_file:
+        pred_file.write("uttid pred tgt\n")
+        for p, utt_idx, t in zip(pred, eval_uttlist, tgt):
 
-        pred_ref.write("uttid pred_mu tgt_mu\n")
-        pred_std.write("uttid pred_mu log_std\n")
-
-        for pmu, pstd, utt_idx, tmu in zip(pred_mu, pred_log_std, eval_uttlist, tgt_mu):
-
-            pmu, pstd, tmu = pmu.item(), pstd.item(), tmu.item()
+            p, t = p.item(), t.item()
             utt=idx_to_uttid[utt_idx.item()]
 
-            line = f"{utt} {pmu} {tmu}\n"
-            pred_ref.write(line)
-
-            std_line = f"{utt} {pmu} {pstd}\n"
-            pred_std.write(std_line)
+            line = f"{utt} {p} {t}\n"
+            pred_file.write(line)
 
     
     # Save the activations for each layer
