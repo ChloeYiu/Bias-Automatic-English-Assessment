@@ -12,13 +12,14 @@ which python
 python --version
 
 if [ $# -lt 3 ]; then
-  echo "Usage: $0 <train_data> <test_data> <calib_data>"
+  echo "Usage: $0 <train_data> <test_data> <calib_data> <model>"
   exit 1
 fi
 
 train_data=$1
 test_data=$2
 calib_data=$3
+model=$4
 
 LOG=Logs/run/process_data.log
 mkdir -p $(dirname $LOG)
@@ -27,14 +28,23 @@ if [ -f $LOG ]; then
 fi
 declare -a seeds=(10 30 50 70 90)
 
+if [ "$model" == "DDN" ]; then
+  pred_file_suffix="pred_ref.txt"
+elif [ "$model" == "DNN" ]; then
+  pred_file_suffix="pred.txt"
+else
+  echo "Unknown model: $model"
+  exit 1
+fi
+
 for part in 1; do
   for seed in "${seeds[@]}"; do   
-    python local/training/score.py \
-      --pred_file ./DDN/ALTA/ASR_V2.0.0/${train_data}/f4-ppl-c2-pdf/part${part}/DDN_${seed}/${test_data}/${test_data}_pred_ref.txt \
-      --calib_model ./DDN/ALTA/ASR_V2.0.0/${train_data}/f4-ppl-c2-pdf/part${part}/DDN_${seed}/${calib_data}/calib_model.pkl;
+    python local/training/${model}_score.py \
+      --pred_file ./${model}/ALTA/ASR_V2.0.0/${train_data}/f4-ppl-c2-pdf/part${part}/${model}_${seed}/${test_data}/${test_data}_${pred_file_suffix} \
+      --calib_model ./${model}/ALTA/ASR_V2.0.0/${train_data}/f4-ppl-c2-pdf/part${part}/${model}_${seed}/${calib_data}/calib_model.pkl;
   done
 
-  python local/training/score.py \
-  --pred_file ./DDN/ALTA/ASR_V2.0.0/${train_data}/f4-ppl-c2-pdf/part${part}/ens_${test_data}/${test_data}_pred_ref.txt \
-  --calib_model ./DDN/ALTA/ASR_V2.0.0/${train_data}/f4-ppl-c2-pdf/part${part}/ens_${test_data}/calib_model.pkl;
+  python local/training/${model}_score.py \
+  --pred_file ./${model}/ALTA/ASR_V2.0.0/${train_data}/f4-ppl-c2-pdf/part${part}/ens_${test_data}/${test_data}_${pred_file_suffix} \
+  --calib_model ./${model}/ALTA/ASR_V2.0.0/${train_data}/f4-ppl-c2-pdf/part${part}/ens_${test_data}/calib_model.pkl;
 done
