@@ -22,10 +22,10 @@ def main(cfg):
 
     #---------------------------------------------
     parent_dir = Path(cfg.ensemble_dir)
-    ddn_dirs = [str(d) for d in parent_dir.glob('DDN*') if d.is_dir()]
+    dnn_dirs = [str(d) for d in parent_dir.glob('DNN*') if d.is_dir()]
 
-    ddn_uncalib_files = [os.path.join(d, cfg.dataname, cfg.dataname + '_pred_ref.txt') for d in ddn_dirs]
-    ddn_calib_files = [os.path.join(d, cfg.dataname, cfg.dataname + '_calib_pred_ref.txt') for d in ddn_dirs]
+    dnn_uncalib_files = [os.path.join(d, cfg.dataname, cfg.dataname + '_pred.txt') for d in dnn_dirs]
+    dnn_calib_files = [os.path.join(d, cfg.dataname, cfg.dataname + '_calib_pred.txt') for d in dnn_dirs]
 
 
     working_dir=f"{parent_dir}/ens_{cfg.dataname}"
@@ -44,7 +44,10 @@ def main(cfg):
     # -----------------------------------------------
     # below will be logic of the code
 
-    df_list = [Pd.read_csv(df_path, delimiter=' ')  for df_path in ddn_uncalib_files]
+    print(dnn_dirs)
+    print(dnn_uncalib_files)
+
+    df_list = [Pd.read_csv(df_path, delimiter=' ')  for df_path in dnn_uncalib_files]
     combined_df = Pd.concat(df_list)
 
     df_grouped = combined_df.groupby('uttid').sum()
@@ -52,7 +55,7 @@ def main(cfg):
     df_divided = df_grouped.div(df_divisors)
     df_divided = df_divided.reset_index()
 
-    output_predictions = os.path.join(working_dir, cfg.dataname + '_pred_ref.txt')
+    output_predictions = os.path.join(working_dir, cfg.dataname + '_pred.txt')
     df_divided.to_csv(output_predictions, sep=' ', index=False)
 
 
@@ -63,7 +66,7 @@ if __name__ == '__main__':
     import argparse
 
     # Initialize the argument parser
-    parser = argparse.ArgumentParser(description='Configuration for DDN training.')
+    parser = argparse.ArgumentParser(description='Configuration for DNN training.')
     parser.add_argument('--ensemble_dir', type=str, required=True, help='Paths to the ensemble directories')
     parser.add_argument('--dataname', type=str, required=True, help='dataname')
     #parser.add_argument('--model_dir', type=str, help='Working root directory')

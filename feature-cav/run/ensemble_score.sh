@@ -18,7 +18,7 @@ test_set="LIESTdev02"
 
 
 if [ $# -lt 2 ]; then
-  echo "Usage: $0 <train_data> <test_data <model>"
+  echo "Usage: $0 <train_data> <test_data> <model>"
   exit 1
 fi
 
@@ -31,8 +31,6 @@ LOG=Logs/run/ensemble_score.log
     if [ -f $LOG ]; then
         \rm $LOG
     fi
-
-declare -a seeds=(10 30 50)
 
 for part in 1; do
     
