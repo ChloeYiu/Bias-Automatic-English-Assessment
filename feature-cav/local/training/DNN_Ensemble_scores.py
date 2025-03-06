@@ -16,7 +16,7 @@ def main(cfg):
     if not os.path.isdir('CMDs'):
         os.mkdir('CMDs')
 
-    with open('CMDs/Ensemble_scores.cmds', 'a') as f:
+    with open('CMDs/DNN_Ensemble_scores.cmds', 'a') as f:
         f.write(' '.join(sys.argv) + '\n')
         f.write('--------------------------------\n')
 
