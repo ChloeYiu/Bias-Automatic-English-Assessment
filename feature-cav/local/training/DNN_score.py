@@ -36,7 +36,7 @@ def main(cfg):
     if not os.path.isdir('CMDs'):
         os.mkdir('CMDs')
 
-    with open('CMDs/DDN_score.cmds', 'a') as f:
+    with open('CMDs/DNN_score.cmds', 'a') as f:
         f.write(' '.join(sys.argv) + '\n')
         f.write('--------------------------------\n')
 
@@ -66,8 +66,8 @@ def main(cfg):
 
     #--------------------------------------------------
     uncalib_df = Pd.read_csv(score_file, delimiter=' ')
-    y_data = np.array(uncalib_df['tgt_mu'])
-    X_data = np.array(uncalib_df['pred_mu'])
+    y_data = np.array(uncalib_df['tgt'])
+    X_data = np.array(uncalib_df['pred'])
     uncalibrated_metrics = Convert_tensors_Compute_Metrics(X_data, y_data)
 
     with open(os.path.join(working_dir, 'uncalib_results.json'), 'w') as fp:
@@ -97,9 +97,9 @@ def main(cfg):
         summary_df = Pd.DataFrame([{ key:round(calibrated_metrics[key], 3) for key in metrics}])
         f.write(tabulate(summary_df, headers='keys', tablefmt='grid'))
 
-    uncalib_df = uncalib_df.drop(columns=['pred_mu'])
+    uncalib_df = uncalib_df.drop(columns=['pred'])
 
-    output_predictions=os.path.join(working_dir,fname.replace('_pred_ref','_calib_pred_ref.txt'))
+    output_predictions=os.path.join(working_dir,fname.replace('_pred','_calib_pred.txt'))
     uncalib_df.to_csv(output_predictions, sep=' ', index=False)
 
 
