@@ -28,16 +28,16 @@ while [ $# -gt 0 ]; do
 done
 set -- "${POSITIONAL[@]}"
 
-if [ $# -lt 3 ]; then
-  echo "Usage: $0 <trainset> <cavset> <testset> <profile>"
+if [ $# -lt 4 ]; then
+  echo "Usage: $0 <trainset> <cavset> <testset> <model>"
   exit 1
 fi
 
 trainset=$1
 cavset=$2
 testset=$3
-profile=$4
-config_file="DDN/ALTA/ASR_V2.0.0/arguments.conf"
+model=$4
+config_file="${model}/ALTA/ASR_V2.0.0/arguments.conf"
 
 # Check if config file exists
 if [ ! -f "$config_file" ]; then
@@ -45,15 +45,15 @@ if [ ! -f "$config_file" ]; then
     exit 1
 fi
 
-top_outdir=DDN/ALTA/ASR_V2.0.0/${trainset}
+top_outdir=${model}/ALTA/ASR_V2.0.0/${trainset}
 seeds="10:90"
 
 for part in 1; do
     if [ -n "$class_weight" ]; then
-        log_base_name=$top_outdir/bias/$cavset/$profile/$testset/bias_all_part${part}_input_layer_$class_weight
+        log_base_name=$top_outdir/bias/$cavset/$testset/bias_all_part${part}_input_layer_$class_weight
         log_file="Logs/$log_base_name.log"
     else
-        log_base_name=$top_outdir/bias/$cavset/$profile/$testset/bias_all_part${part}_input_layer
+        log_base_name=$top_outdir/bias/$cavset/$testset/bias_all_part${part}_input_layer
         log_file="Logs/$log_base_name.log"
         class_weight="None"
     fi
@@ -67,7 +67,7 @@ for part in 1; do
     fi
 
     # Run the evaluation script with arguments from JSON file
-    cmd="python local/training/eval_bias_all.py --TRAINSET $trainset --CAVSET $cavset --BIASSET $testset --CLASS_WEIGHT $class_weight  --CONFIG_FILE $config_file --PART $part --SEED $seeds --LAYER input_layer --TOP_DIR $top_outdir"
+    cmd="python local/training/eval_bias_all.py --TRAINSET $trainset --CAVSET $cavset --BIASSET $testset --CLASS_WEIGHT $class_weight  --CONFIG_FILE $config_file --PART $part --SEED $seeds --LAYER input_layer --MODEL $model --TOP_DIR $top_outdir"
     echo $cmd
     $cmd >> $log_file 2>&1
 done

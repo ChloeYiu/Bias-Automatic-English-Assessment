@@ -11,6 +11,7 @@ def main(args):
     class_weight = args.CLASS_WEIGHT if args.CLASS_WEIGHT == 'balanced' else None
     part = args.PART
     seed_range = args.SEED
+    model_name = args.MODEL
 
     config_file = args.CONFIG_FILE  
     config_parser = configparser.ConfigParser()
@@ -22,7 +23,7 @@ def main(args):
     top_dir = args.TOP_DIR
     print(f'Class weight: {class_weight}')
 
-    bias_multiple = BiasMultipleGrad(seed_range)
+    bias_multiple = BiasMultipleGrad(seed_range, model_name)
     bias_all = BiasAllGrad(config_parser, config_list)
 
     top_name = f"{top_dir}/bias/{cav_set}/{bias_set}_bias_part{part}"
@@ -42,15 +43,26 @@ def main(args):
                 distance_file = f"{top_concept_name}_{seed}_{layer}_{class_weight}.txt"
             else:
                 distance_file = f"{top_concept_name}_{seed}_{layer}.txt"
-            pred_file = f"{top_dir}/f4-ppl-c2-pdf/part{part}/{seed}/{bias_set}/{bias_set}_pred_ref.txt"
+
+            if model_name == 'DNN':
+                pred_file = f"{top_dir}/f4-ppl-c2-pdf/part{part}/{seed}/{bias_set}/{bias_set}_pred.txt"
+            elif model_name == 'DDN':
+                pred_file = f"{top_dir}/f4-ppl-c2-pdf/part{part}/{seed}/{bias_set}/{bias_set}_pred_ref.txt"
+            else:
+                raise ValueError('Model name not found')
 
             score_reader = BiasTool(pred_file)
-            raw_score = score_reader.read_raw_score('pred_mu')
+            if model_name == 'DNN':
+                raw_score = score_reader.read_raw_score('pred')
+            elif model_name == 'DDN':
+                raw_score = score_reader.read_raw_score('pred_mu')
+            else:
+                raise ValueError('Model name not found')
             distance_reader = BiasTool(distance_file)
             distance = distance_reader.read_distance('DISTANCE')
             bias_all.add(concept, raw_score, distance)
 
-    bias_all.plot_all_graph(plot_title, plot_file)
+    bias_all.plot_graph(plot_title, plot_file)
     print(f'Graph saved in {plot_file}')
 
 
@@ -65,5 +77,6 @@ if __name__ == '__main__':
     commandLineParser.add_argument('--SEED', type=str, help='Range of seeds')
     commandLineParser.add_argument('--LAYER', type=str, help='Layer under consideration')
     commandLineParser.add_argument('--TOP_DIR', type=str, help='Top directory')
+    commandLineParser.add_argument('--MODEL', type=str, help='Model name (DDN vs DNN)')
     args = commandLineParser.parse_args()
     main(args)
