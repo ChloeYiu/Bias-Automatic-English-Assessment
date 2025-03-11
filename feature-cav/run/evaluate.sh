@@ -27,7 +27,7 @@ LOG=Logs/run/evaluate.log
         \rm $LOG
     fi
 
-declare -a seeds=(10 30 50)
+declare -a seeds=(10 30 50 70 90)
 
 for part in 1; do
   for seed in "${seeds[@]}"; do
