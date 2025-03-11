@@ -1,14 +1,22 @@
-#run/eval_cav_mean_std.sh  LIESTgrp06 LIESTgrp06 LIESTgrp06 grade_A
-#run/eval_cav_mean_std.sh  LIESTgrp06 LIESTgrp06 LIESTgrp06 grade_B2
-#run/eval_cav_mean_std.sh  LIESTgrp06 LIESTgrp06 LIESTgrp06 grade_C
-run/eval_cav_mean_std.sh  LIESTgrp06_thai LIESTgrp06_thai LIESTgrp06_thai thai
-run/eval_cav_mean_std.sh  LIESTgrp06_spanish LIESTgrp06_spanish LIESTgrp06_spanish spanish
-run/eval_cav_mean_std.sh  LIESTgrp06_young LIESTgrp06_young LIESTgrp06_young young
-run/eval_cav_mean_std.sh  LIESTgrp06_male LIESTgrp06_male LIESTgrp06_male male
-#run/eval_cav_mean_std.sh  LIESTgrp06 LIESTgrp06 LIESTgrp06 grade_A --class_weight balanced
-#run/eval_cav_mean_std.sh  LIESTgrp06 LIESTgrp06 LIESTgrp06 grade_B2 --class_weight balanced
-#run/eval_cav_mean_std.sh  LIESTgrp06 LIESTgrp06 LIESTgrp06 grade_C --class_weight balanced
-run/eval_cav_mean_std.sh  LIESTgrp06_thai LIESTgrp06_thai LIESTgrp06_thai thai --class_weight balanced
-run/eval_cav_mean_std.sh  LIESTgrp06_spanish LIESTgrp06_spanish LIESTgrp06_spanish spanish --class_weight balanced
-run/eval_cav_mean_std.sh  LIESTgrp06_young LIESTgrp06_young LIESTgrp06_young young --class_weight balanced
-run/eval_cav_mean_std.sh  LIESTgrp06_male LIESTgrp06_male LIESTgrp06_male male --class_weight balanced
+#!/bin/bash
+#$ -S /bin/bash
+
+ALLARGS="$0 $@"
+ARGS="$@"
+
+model=$1
+
+run/eval_cav_mean_std.sh  LIESTgrp06 LIESTgrp06 LIESTgrp06 $model grade_A
+run/eval_cav_mean_std.sh  LIESTgrp06 LIESTgrp06 LIESTgrp06 $model grade_B2
+run/eval_cav_mean_std.sh  LIESTgrp06 LIESTgrp06 LIESTgrp06 $model grade_C
+run/eval_cav_mean_std.sh  LIESTgrp06 LIESTgrp06 LIESTgrp06 $model thai
+run/eval_cav_mean_std.sh  LIESTgrp06 LIESTgrp06 LIESTgrp06 $model spanish
+run/eval_cav_mean_std.sh  LIESTgrp06 LIESTgrp06 LIESTgrp06 $model young
+run/eval_cav_mean_std.sh  LIESTgrp06 LIESTgrp06 LIESTgrp06 $model male
+run/eval_cav_mean_std.sh  LIESTgrp06 LIESTgrp06 LIESTgrp06 $model grade_A --class_weight balanced
+run/eval_cav_mean_std.sh  LIESTgrp06 LIESTgrp06 LIESTgrp06 $model grade_B2 --class_weight balanced
+run/eval_cav_mean_std.sh  LIESTgrp06 LIESTgrp06 LIESTgrp06 $model grade_C --class_weight balanced
+run/eval_cav_mean_std.sh  LIESTgrp06 LIESTgrp06 LIESTgrp06 $model thai --class_weight balanced
+run/eval_cav_mean_std.sh  LIESTgrp06 LIESTgrp06 LIESTgrp06 $model spanish --class_weight balanced
+run/eval_cav_mean_std.sh  LIESTgrp06 LIESTgrp06 LIESTgrp06 $model young --class_weight balanced
+run/eval_cav_mean_std.sh  LIESTgrp06 LIESTgrp06 LIESTgrp06 $model male --class_weight balanced
