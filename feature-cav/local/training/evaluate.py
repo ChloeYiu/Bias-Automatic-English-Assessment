@@ -136,18 +136,17 @@ class BiasGradPlotter:
 
 
 class BiasMultipleGrad:
-    def __init__(self, seed_range):
-        self.seed_list = self.extract_seeds(seed_range)
+    def __init__(self, seed_range, model_name):
+        self.seed_list = self.extract_seeds(seed_range, model_name)
         self.individual_distance_list = []
         self.avg_individual_distance_list = []
         self.overall_distance_list = []
         self.scores_list = []
 
     @staticmethod
-    def extract_seeds(seed_range):
-        print(seed_range)
+    def extract_seeds(seed_range, model_name):
         start, end = map(int, seed_range.split(':'))
-        return [f'DDN_{seed}' for seed in range(start, end + 1, 20)]
+        return [f'{model_name}_{seed}' for seed in range(start, end + 1, 20)]
 
     def print_distance(self):
         print("OVERALL STATS:")

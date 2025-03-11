@@ -28,16 +28,17 @@ while [ $# -gt 0 ]; do
 done
 set -- "${POSITIONAL[@]}"
 
-if [ $# -lt 3 ]; then
-  echo "Usage: $0 <trainset> <cavset> <testset> <profile>"
+if [ $# -lt 5 ]; then
+  echo "Usage: $0 <trainset> <cavset> <testset> <model> <profile>"
   exit 1
 fi
 
 trainset=$1
 cavset=$2
 testset=$3
-profile=$4
-config_file="DDN/ALTA/ASR_V2.0.0/arguments.conf"
+model=$4
+profile=$5
+config_file="${model}/ALTA/ASR_V2.0.0/arguments.conf"
 
 # Check if config file exists
 if [ ! -f "$config_file" ]; then
@@ -59,7 +60,7 @@ load_config() {
 # Load configuration
 load_config "$profile" "$config_file"
 
-top_outdir=DDN/ALTA/ASR_V2.0.0/${trainset}
+top_outdir=${model}/ALTA/ASR_V2.0.0/${trainset}
 seeds="10:90"
 
 for part in 1; do
@@ -83,7 +84,7 @@ for part in 1; do
     fi
 
     # Run the evaluation script with arguments from JSON file
-    cmd="python local/training/eval_bias_multiple.py --TRAINSET $trainset --CAVSET $cavset --BIASSET $testset --CLASS_WEIGHT $class_weight  --BIAS $profile --PART $part --SEED $seeds --LAYER input_layer --TOP_DIR $top_outdir"
+    cmd="python local/training/eval_bias_multiple.py --TRAINSET $trainset --CAVSET $cavset --BIASSET $testset --CLASS_WEIGHT $class_weight  --BIAS $profile --PART $part --SEED $seeds --MODEL $model --LAYER input_layer --TOP_DIR $top_outdir"
     echo $cmd
     $cmd >> $log_file 2>&1
 done

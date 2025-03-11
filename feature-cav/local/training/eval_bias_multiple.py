@@ -13,11 +13,12 @@ def main(args):
     bias = args.BIAS
     layer = args.LAYER
     top_dir = args.TOP_DIR
+    model_name = args.MODEL
     plot_title = bias.replace('_', ' ').title()
     print(f'Argument parsed, bias = {bias}')
     print(f'Class weight: {class_weight}')
 
-    bias_multiple = BiasMultipleGrad(seed)
+    bias_multiple = BiasMultipleGrad(seed, model_name)
 
     top_name = f"{top_dir}/bias/{cav_set}/{bias}/{bias_set}/bias_part{part}_input_layer"
 
@@ -36,7 +37,13 @@ def main(args):
             cav_file = f"{top_dir}/cav/{cav_set}/{bias}/cav_part{part}_{seed}_input_layer.txt"
             distance_file = f"{top_dir}/bias/{cav_set}/{bias}/{bias_set}/bias_part{part}_{seed}_input_layer.txt"
         gradient_file = f"{top_dir}/gradients/{bias_set}/gradients_part{part}_{seed}_input_layer.txt"
-        pred_file = f"{top_dir}/f4-ppl-c2-pdf/part{part}/{seed}/{bias_set}/{bias_set}_pred_ref.txt"
+
+        if model_name == 'DNN':
+            pred_file = f"{top_dir}/f4-ppl-c2-pdf/part{part}/{seed}/{bias_set}/{bias_set}_pred.txt"
+        elif model_name == 'DDN':
+            pred_file = f"{top_dir}/f4-ppl-c2-pdf/part{part}/{seed}/{bias_set}/{bias_set}_pred_ref.txt"
+        else: 
+            raise ValueError('Model name not found')
 
         bias_evaluator = BiasGradEvaluator(gradient_file, cav_file)
         bias_plotter = BiasGradPlotter(pred_file)
@@ -51,7 +58,10 @@ def main(args):
 
         print(f'Overall distance: {overall_distance}')
         print(f'Average individual distance: {avg_individual_distance}')
-        bias_multiple.scores_list.append(bias_plotter.read_raw_score('pred_mu'))
+        if model_name == 'DNN':
+            bias_multiple.scores_list.append(bias_plotter.read_raw_score('pred'))
+        elif model_name == 'DDN':
+            bias_multiple.scores_list.append(bias_plotter.read_raw_score('pred_mu'))
         bias_multiple.overall_distance_list.append(overall_distance)
         bias_multiple.individual_distance_list.append(individual_distance)
         bias_multiple.avg_individual_distance_list.append(avg_individual_distance)
@@ -72,5 +82,6 @@ if __name__ == '__main__':
     commandLineParser.add_argument('--SEED', type=str, help='Range of seeds')
     commandLineParser.add_argument('--LAYER', type=str, help='Layer under consideration')
     commandLineParser.add_argument('--TOP_DIR', type=str, help='Top directory')
+    commandLineParser.add_argument('--MODEL', type=str, help='Model name (DDN vs DNN)')
     args = commandLineParser.parse_args()
     main(args)
