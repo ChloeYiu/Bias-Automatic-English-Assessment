@@ -28,6 +28,12 @@ while [ $# -gt 0 ]; do
         shift
         shift
         ;;
+        --no_grad)
+        cmdopts="$cmdopts $1"
+        no_grad=True
+        shift
+        shift
+        ;;
     *)
     POSITIONAL+=("$1")
     shift
@@ -81,6 +87,9 @@ for part in 1; do
     echo "Logging to $LOG"
 
     cmd="python local/python/predict_with_hook.py --DATA_DIR data_vectors_attention/$test_set/${test_set}_part${part}_att.hf --MODEL_DIR $model_dir --GRADIENT_DIR $gradient_dir --ACTIVATION_DIR $activation_dir --PREDICTION_DIR $prediction_dir --OUTPUT_FILE $output_file.txt --BIASED_SCORE $biased_score"
+    if [ -n "$no_grad" ]; then
+      cmd="$cmd --NO_GRAD"
+    fi
 
     echo $cmd
     $cmd >> $LOG 2>&1

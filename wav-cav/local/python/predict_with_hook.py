@@ -9,9 +9,10 @@ from train import Wav2Vec2ForSpeechClassification
 from cav import ActivationGetter
 from biased_score import load_biased_score
 
-device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
-print(f"Device: {device}")
-print(f"Device name: {torch.cuda.get_device_name(1)}")
+# device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda")
+# print(f"Device: {device}")
+# print(f"Device name: {torch.cuda.get_device_name(1)}")
 
 def calc_feat_size(audio_len):
     '''
@@ -26,7 +27,7 @@ def calc_feat_size(audio_len):
 
     return n_feat_vecs
 
-def predict(batch, model, device, activation_getter, processor):
+def predict(batch, model, device, activation_getter, processor, extract_grad=True):
     arrays = []
     for speech_array in batch["input_values"]:
         arrays.append(speech_array)
@@ -62,20 +63,23 @@ def predict(batch, model, device, activation_getter, processor):
     attention_mask = torch.tensor(attention_mask, dtype=torch.bool)
     attention_heads_mask = attention_mask.to(device)
     
-    logits = model(input_values, attention_heads_mask).logits 
-
-    for layer_name in activation_getter.layer_names:
-        activations = activation_getter.activation_cache[layer_name]
-        # Compute gradients for this sample
-        grad = torch.autograd.grad(
-            outputs=logits,
-            inputs=activations,
-            grad_outputs=torch.ones_like(logits),
-            create_graph=False,
-            retain_graph=False,
-            allow_unused=True
-        )
-        activation_getter.store_tmp_gradient(grad)
+    if extract_grad:
+        logits = model(input_values, attention_heads_mask).logits
+        for layer_name in activation_getter.layer_names:
+            activations = activation_getter.activation_cache[layer_name]
+            # Compute gradients for this sample
+            grad = torch.autograd.grad(
+                outputs=logits,
+                inputs=activations,
+                grad_outputs=torch.ones_like(logits),
+                create_graph=False,
+                retain_graph=False,
+                allow_unused=True
+            )
+            activation_getter.store_tmp_gradient(grad)
+    else:
+        with torch.no_grad():
+            logits = model(input_values, attention_heads_mask).logits
 
     batch["predicted"] = logits.detach().cpu().numpy()
     activation_getter.store_tmp_prediction(batch["predicted"][0][0])
@@ -89,6 +93,7 @@ def main(args):
     gradient_dir = args.GRADIENT_DIR
     prediction_dir = args.PREDICTION_DIR
     output_file = args.OUTPUT_FILE
+    extract_grad = not args.NO_GRAD
     output_dir = os.path.dirname(output_file)
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -110,25 +115,32 @@ def main(args):
         test_ds = test_dataset.select(range(start_index, len(test_dataset))) if start_index != 0 else test_dataset # there are internal cache if we preserve the exact same dataset, which could speed up the process
         #test_ds = test_ds.map(speech_file_to_array_fn)
 
-        activation_getter.add_hooks()
+        if extract_grad:
+            activation_getter.add_hooks()
 
-        test_ds = test_ds.map(lambda batch: predict(batch, model, device, activation_getter, processor), batched=True, batch_size=1)
-        activation_getter.remove_hooks()
+        test_ds = test_ds.map(lambda batch: predict(batch, model, device, activation_getter, processor, extract_grad), batched=True, batch_size=1)
+        if extract_grad:
+            activation_getter.remove_hooks()
     else:
         print("All predictions have been made")
 
     speaker_id = test_dataset['base_id']
     with open(activation_getter.prediction_file_generator.tmp_file(), 'r') as file:
         pred_score = [float(line.strip()) for line in file.readlines()]
+        print(f"Number of predictions: {len(pred_score)}")
     ref_score = test_dataset['labels'] if args.BIASED_SCORE == 'None' else load_biased_score(args.BIASED_SCORE)
     with open(output_file, 'w') as f:
         f.write('SPEAKERID PRED REF\n')
+        pred_lines = 0
         for spkr, ref, pred in zip(speaker_id, ref_score, pred_score):
             f.write(f'{spkr} {pred} {ref}\n')
+            pred_lines += 1
+        print(f"Number of predictions: {pred_lines}")
 
-    # Save the activations for each layer
-    activation_getter.store_activations(speaker_id)
-    activation_getter.store_gradients(speaker_id)
+    if extract_grad:
+        # Save the activations for each layer
+        activation_getter.store_activations(speaker_id)
+        activation_getter.store_gradients(speaker_id)
     activation_getter.remove_prediction_tmp_file()
 
 
@@ -141,5 +153,6 @@ if __name__ == '__main__':
     commandLineParser.add_argument('--PREDICTION_DIR', type=str, help='directory to store predictions')
     commandLineParser.add_argument('--OUTPUT_FILE', type=str, help='file to save prediction')
     commandLineParser.add_argument('--BIASED_SCORE', type=str, help='profile to bias test data, if exists')
+    commandLineParser.add_argument('--NO_GRAD', action='store_true', help='need to extract gradients')
     args = commandLineParser.parse_args()
     main(args)
