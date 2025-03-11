@@ -29,14 +29,15 @@ done
 set -- "${POSITIONAL[@]}"
 
 if [ $# -lt 3 ]; then
-  echo "Usage: $0 <trainset> <cavset> <profile>"
+  echo "Usage: $0 <trainset> <cavset> <model> <profile>"
   exit 1
 fi
 
 trainset=$1
 cavset=$2
-profile=$3
-config_file="DDN/ALTA/ASR_V2.0.0/arguments.conf"
+model=$3
+profile=$4
+config_file="${model}/ALTA/ASR_V2.0.0/arguments.conf"
 
 # Check if config file exists
 if [ ! -f "$config_file" ]; then
@@ -64,17 +65,17 @@ if [ -z "$TARGET_FILE" ] || [ -z "$SPEAKER_COLUMN" ] || [ -z "$TARGET_COLUMN" ];
     exit 1
 fi
 
-top_outdir=./DDN/ALTA/ASR_V2.0.0/${trainset}
+top_outdir=./${model}/ALTA/ASR_V2.0.0/${trainset}
 declare -a seeds=(10 30 50 70 90)
 
 for part in 1; do
   for seed in "${seeds[@]}"; do
-    activation_base_name=$top_outdir/activations/$cavset/activations_part${part}_DDN_${seed}_input_layer
+    activation_base_name=$top_outdir/activations/$cavset/activations_part${part}_${model}_${seed}_input_layer
 
     if [ -n "$class_weight" ]; then
-        output_base_name=$top_outdir/cav/$cavset/$profile/cav_part${part}_DDN_${seed}_input_layer_$class_weight
+        output_base_name=$top_outdir/cav/$cavset/$profile/cav_part${part}_${model}_${seed}_input_layer_$class_weight
     else
-        output_base_name=$top_outdir/cav/$cavset/$profile/cav_part${part}_DDN_${seed}_input_layer
+        output_base_name=$top_outdir/cav/$cavset/$profile/cav_part${part}_${model}_${seed}_input_layer
     fi
     
     log_file="Logs/$output_base_name.log"
