@@ -30,10 +30,10 @@ def main(args):
 
     if class_weight:
         plot_file = f"{top_name}_{layer}_{class_weight}.png"
-        plot_title = f"Feature - Balanced Weighting"
+        plot_title = f"Feature {model_name} - Balanced Weighting"
     else:
         plot_file = f"{top_name}_{layer}.png"
-        plot_title = f"Feature - No Weighting"
+        plot_title = f"Feature {model_name} - No Weighting"
 
     for concept in config_list:
         top_concept_name = f"{top_dir}/bias/{cav_set}/{concept}/{bias_set}/bias_part{part}"
