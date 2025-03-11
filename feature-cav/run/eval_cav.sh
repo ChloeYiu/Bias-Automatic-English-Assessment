@@ -28,7 +28,7 @@ while [ $# -gt 0 ]; do
 done
 set -- "${POSITIONAL[@]}"
 
-if [ $# -lt 4 ]; then
+if [ $# -lt 5 ]; then
   echo "Usage: $0 <trainset> <cavset> <testset> <model> <profile>"
   exit 1
 fi
