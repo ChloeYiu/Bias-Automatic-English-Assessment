@@ -90,6 +90,7 @@ for part in 1; do
     fi
     
     file_name="$file_name,$input_base_name.txt"
+  done
 
     log_file="LOGs/$log_base_name.log"
 
@@ -105,5 +106,4 @@ for part in 1; do
     cmd="python local/python/eval_cav_mean_std.py  --INPUT_FILES $file_name --OUTPUT_FILE $output_file.txt"
     echo $cmd
     $cmd >> $log_file 2>&1
-  done
 done

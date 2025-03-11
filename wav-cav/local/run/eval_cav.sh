@@ -68,7 +68,7 @@ if [ -z "$TARGET_FILE" ] || [ -z "$SPEAKER_COLUMN" ] || [ -z "$TARGET_COLUMN" ];
     exit 1
 fi
 
-declare -a seeds=(24)
+declare -a seeds=(2 24)
 
 for part in 1; do
   top_outdir=eval/$trainset/part$part

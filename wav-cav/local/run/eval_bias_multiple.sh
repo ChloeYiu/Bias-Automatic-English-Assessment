@@ -62,7 +62,7 @@ load_config() {
 # Load configuration
 load_config "$profile" "$config_file"
 
-seeds="2"
+seeds="2,24"
 
 for part in 1; do
     top_outdir=eval/$trainset/part$part
