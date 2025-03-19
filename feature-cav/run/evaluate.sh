@@ -34,7 +34,7 @@ for part in 1; do
     
     top_outdir=./${model}/ALTA/ASR_V2.0.0/${train_data}
 
-    cmd="python local/training/${model}_evaluate.py --data_dir ./data/ALTA/ASR_V2.0.0/$test_data/f4-ppl-c2-pdf/part$part --model_dir $top_outdir/f4-ppl-c2-pdf/part${part}/${model}_${seed} --GRADIENT_DIR $top_outdir/gradients/$test_data --ACTIVATION_DIR $top_outdir/activations/$test_data"
+    cmd="python local/training/model_evaluate.py --data_dir ./data/ALTA/ASR_V2.0.0/$test_data/f4-ppl-c2-pdf/part$part --model_dir $top_outdir/f4-ppl-c2-pdf/part${part}/${model}_${seed} --GRADIENT_DIR $top_outdir/gradients/$test_data --ACTIVATION_DIR $top_outdir/activations/$test_data --model_type $model"
 
     echo $cmd
     $cmd >> $LOG 2>&1

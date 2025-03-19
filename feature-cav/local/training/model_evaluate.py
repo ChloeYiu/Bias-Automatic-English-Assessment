@@ -12,7 +12,7 @@ import json
 
 import yaml
 from argparse import Namespace
-from ddn_model import LitModel
+from model import LitModel, LitBertModel, LitDNNModel
 from utils_Fns import process_data_file
 from torch.utils.data import TensorDataset
 
@@ -31,10 +31,12 @@ def Load_models_from_chkpt(wt_file):
 #--------------------------------------------------------
 def main(cfg):
 
+    model_type = cfg.model_type
+
     if not os.path.isdir('CMDs'):
         os.mkdir('CMDs')
 
-    with open('CMDs/DDN_evaluate.cmds', 'a') as f:
+    with open(f'CMDs/{model_type}_evaluate.cmds', 'a') as f:
         f.write(' '.join(sys.argv) + '\n')
         f.write('--------------------------------\n')
 
@@ -74,7 +76,12 @@ def main(cfg):
 
     wt_file=os.path.join(f"{cfg.model_dir}",'model.ckpt')
 
-    model = LitModel(loaded_cfg)
+    if model_type == 'DNN':
+        model = LitDNNModel(loaded_cfg)
+    elif model_type == 'DDN_BERT':
+        model = LitBertModel(loaded_cfg)
+    else:
+        model = LitModel(loaded_cfg)
     model_name = "_".join(Path(cfg.model_dir).parts[-2:])
     activation_dir = cfg.ACTIVATION_DIR
     gradient_dir = cfg.GRADIENT_DIR
@@ -106,32 +113,39 @@ def main(cfg):
     encoded_uttids = [uttid_to_idx[uttid] for uttid in dev_uttids]
     encoded_uttids = torch.tensor(encoded_uttids, dtype=torch.long)
     dev_dataset = TensorDataset(torch.tensor(dev_feat).float(), torch.tensor(dev_labels).float(), encoded_uttids)
+    
+    if model_type == 'DNN':
+        pred, tgt, eval_uttlist = model.evaluate(dev_dataset, activation_getter)
+            with open(os.path.join(working_dir, f'{dataname}_pred.txt'), 'w') as pred_file:
+            pred_file.write("uttid pred tgt\n")
+            for p, utt_idx, t in zip(pred, eval_uttlist, tgt):
 
-    pred_mu, pred_log_std, tgt_mu, eval_uttlist = model.evaluate(dev_dataset, activation_getter)
+                p, t = p.item(), t.item()
+                utt=idx_to_uttid[utt_idx.item()]
 
-
-    with open(os.path.join(working_dir, f'{dataname}_pred_ref.txt'), 'w') as pred_ref, \
+                line = f"{utt} {p} {t}\n"
+                pred_file.write(line)
+    else:
+        pred_mu, pred_log_std, tgt_mu, eval_uttlist = model.evaluate(dev_dataset, activation_getter)
+        with open(os.path.join(working_dir, f'{dataname}_pred_ref.txt'), 'w') as pred_ref, \
             open(os.path.join(working_dir, f'{dataname}_pred_std.txt'), 'w') as pred_std :
+            pred_ref.write("uttid pred_mu tgt_mu\n")
+            pred_std.write("uttid pred_mu log_std\n")
 
-        pred_ref.write("uttid pred_mu tgt_mu\n")
-        pred_std.write("uttid pred_mu log_std\n")
+            for pmu, pstd, utt_idx, tmu in zip(pred_mu, pred_log_std, eval_uttlist, tgt_mu):
 
-        for pmu, pstd, utt_idx, tmu in zip(pred_mu, pred_log_std, eval_uttlist, tgt_mu):
+                pmu, pstd, tmu = pmu.item(), pstd.item(), tmu.item()
+                utt=idx_to_uttid[utt_idx.item()]
 
-            pmu, pstd, tmu = pmu.item(), pstd.item(), tmu.item()
-            utt=idx_to_uttid[utt_idx.item()]
+                line = f"{utt} {pmu} {tmu}\n"
+                pred_ref.write(line)
 
-            line = f"{utt} {pmu} {tmu}\n"
-            pred_ref.write(line)
-
-            std_line = f"{utt} {pmu} {pstd}\n"
-            pred_std.write(std_line)
-
+                std_line = f"{utt} {pmu} {pstd}\n"
+                pred_std.write(std_line)
     
     # Save the activations for each layer
     activation_getter.store_activations(dev_uttids)
     activation_getter.store_gradients(dev_uttids)
-
 
 if __name__ == '__main__':
     import sys
@@ -140,7 +154,8 @@ if __name__ == '__main__':
     import argparse
 
     # Initialize the argument parser
-    parser = argparse.ArgumentParser(description='Configuration for DDN training.')
+    parser = argparse.ArgumentParser(description='Configuration for model training.')
+    parser.add_argument('--model_type', type=str, required=True, help='Type of model to train')
     parser.add_argument('--process_data_path', type=str, default='processed_data',help=' ')
     parser.add_argument('--data_dir', type=str, default='', help='Path to development data')
     parser.add_argument('--model_dir', type=str, help='Working root directory')
