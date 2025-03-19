@@ -28,9 +28,9 @@ if [ -f $LOG ]; then
 fi
 declare -a seeds=(10 30 50 70 90)
 
-if [[ "$model" == "DDN" || "$model" == "DDN_BERT" ]]; then
+if [ "$model" == DDN* ]; then
   pred_file_suffix="pred_ref.txt"
-elif [ "$model" == "DNN" ]; then
+elif [ "$model" == DNN* ]; then
   pred_file_suffix="pred.txt"
 else
   echo "Unknown model: $model"
