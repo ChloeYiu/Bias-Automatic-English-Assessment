@@ -25,7 +25,7 @@ declare -a seeds=(10 30 50 70 90)
 
 for part in 1; do
   for seed in "${seeds[@]}"; do
-    if [ "$model" == "DDN" ]; then
+    if [ "$model" == "DDN" || "$model" == "DDN_BERT" ]; then
       pred_file_suffix="_pred_ref.txt"
     elif [ "$model" == "DNN" ]; then
       pred_file_suffix="_pred.txt"
