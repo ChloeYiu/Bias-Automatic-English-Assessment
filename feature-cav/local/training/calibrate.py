@@ -18,11 +18,12 @@ import json
 #--------------------------------------------------------
 
 def main(cfg):
+    model_type = cfg.model_type
 
     if not os.path.isdir('CMDs'):
         os.mkdir('CMDs')
 
-    with open('CMDs/calibrate.cmds', 'a') as f:
+    with open(f'CMDs/{model_type}_calibrate.cmds', 'a') as f:
         f.write(' '.join(sys.argv) + '\n')
         f.write('--------------------------------\n')
 
@@ -47,8 +48,12 @@ def main(cfg):
 
     #--------------------------------------------------
     uncalib_df = Pd.read_csv(pred_file, delimiter=' ')
-    y_data = np.array(uncalib_df['tgt_mu'])
-    X_data = np.array(uncalib_df['pred_mu'])
+    if model_type == "DNN":
+         y_data = np.array(uncalib_df['tgt'])
+        X_data = np.array(uncalib_df['pred'])
+    else:
+        y_data = np.array(uncalib_df['tgt_mu'])
+        X_data = np.array(uncalib_df['pred_mu'])
 
     reg = LinearRegression().fit(X_data.reshape(-1, 1), y_data.reshape(-1, 1))
 
@@ -74,6 +79,7 @@ if __name__ == '__main__':
     import ast
     # Initialize the argument parser
     parser = argparse.ArgumentParser(description='')
+    parser.add_argument('--model_type', type=str, required=True, default='', help='')
     parser.add_argument('--pred_file', type=str, required=True, default='', help='')
     cfg = parser.parse_args()
     main(cfg)

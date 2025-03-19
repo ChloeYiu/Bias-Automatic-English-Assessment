@@ -34,9 +34,9 @@ for part in 1; do
       exit 1
     fi
 
-    python local/training/${model}_calibrate.py \
-      --pred_file ./${model}/ALTA/ASR_V2.0.0/${train_data}/f4-ppl-c2-pdf/part${part}/${model}_${seed}/${calib_data}/${calib_data}${pred_file_suffix}
+    python local/training/calibrate.py \
+      --pred_file ./${model}/ALTA/ASR_V2.0.0/${train_data}/f4-ppl-c2-pdf/part${part}/${model}_${seed}/${calib_data}/${calib_data}${pred_file_suffix} --model_type $model
   done
-  python local/training/${model}_calibrate.py \
-    --pred_file ./${model}/ALTA/ASR_V2.0.0/${train_data}/f4-ppl-c2-pdf/part${part}/ens_${test_data}/${test_data}${pred_file_suffix}
+  python local/training/calibrate.py \
+    --pred_file ./${model}/ALTA/ASR_V2.0.0/${train_data}/f4-ppl-c2-pdf/part${part}/ens_${test_data}/${test_data}${pred_file_suffix} --model_type $model
 done
