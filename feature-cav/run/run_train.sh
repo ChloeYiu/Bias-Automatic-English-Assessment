@@ -22,4 +22,6 @@ model=$3
 grader_seed=$4
 input_size=$5
 
-python ./local/training/${model}_Trainers.py --train_data $train_data --dev_data $dev_data --grader_seed $grader_seed --input_size $input_size 
+python ./local/training/trainers.py --train_data $train_data --dev_data $dev_data --grader_seed $grader_seed --input_size $input_size --model_type $model;
+
+

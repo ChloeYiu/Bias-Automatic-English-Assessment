@@ -37,9 +37,9 @@ fi
 bin=./run/run_train.sh
 waitid=""
 
-declare -a seeds=(70 90)
+declare -a seeds=(10 30 50 70 90)
 
-if [ $# -lt 2 ]; then
+if [ $# -lt 3 ]; then
   echo "Usage: $0 <train_data> <dev_data> <model>"
   exit 1
 fi

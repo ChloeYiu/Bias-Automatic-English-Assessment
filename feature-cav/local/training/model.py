@@ -279,3 +279,86 @@ class LogToFileCallback(pl.Callback):
 
         with open(self.log_file_path, 'a') as log_file:
             log_file.write(log_line + '\n')
+
+class LitBertModel(LitModel):
+    def __init__(self, cfg):
+        super().__init__(cfg)
+
+        self.input_size = cfg.input_size
+        self.hidden_1 = cfg.hidden_1
+        self.hidden_2 = cfg.hidden_2
+        self.dropout = cfg.dropout
+
+        self.input_layer = nn.Linear(self.input_size, self.hidden_1)
+        self.hidden_layers = nn.ModuleList([nn.Sequential(
+                nn.Linear(self.hidden_1, self.hidden_2),
+                nn.ReLU())])
+
+        # Output layer
+        self.output_layer = nn.Linear(self.hidden_2, 2)
+
+        del self.n_hidden
+        del self.n_hidden_layers
+
+class LitDNNModel(LitModel):
+    def __init__(self, cfg):
+        super().__init__(cfg)
+        # Output layer
+        self.output_layer = nn.Linear(self.n_hidden, 1)
+
+        # Remove inherited attributes that are not needed
+        del self.loss_fn_type
+        del self.var_lim
+        del self.log_var_lim
+
+    def evaluate(self, dataloader, activation_getter):
+        # This method is used for evaluation
+        self.eval()  # Set the model to evaluation mode
+        activation_getter.add_hooks()
+
+        predictions_list = []  # List to accumulate predictions
+        y_tgt_list = []
+        eval_utt_list = []
+        #Iterate through the data loader to make predictions
+
+        for batch in dataloader:
+            x, y_tgt, utt_ids = batch
+            x, y_tgt = x.unsqueeze(0), y_tgt.unsqueeze(0)
+
+            predictions, loss = self.evaluation_step((x, y_tgt), 0)  # 0 is a placeholder for batch_idx
+            predictions_list.append(predictions)
+            y_tgt_list.append(y_tgt)
+            eval_utt_list+=[utt_ids]
+
+            for layer_name in activation_getter.layer_names:
+                activations = activation_getter.activation_cache[layer_name]
+                # Compute gradients for this sample
+                grad = torch.autograd.grad(
+                    outputs=predictions,
+                    inputs=activations,
+                    grad_outputs=torch.ones_like(predictions),
+                    create_graph=False,
+                    retain_graph=False,
+                    allow_unused=True
+                )
+                activation_getter.store_tmp_gradient(grad)
+
+        # Concatenate the predictions to create a single tensor
+        predictions_tensor = torch.cat(predictions_list, dim=0).unsqueeze(1)
+        tgt = torch.cat(y_tgt_list, dim=0)
+
+        activation_getter.remove_hooks()
+
+        return predictions_tensor, tgt, eval_utt_list
+
+    def _define_cost(self):
+        # define cost with MSE
+        self.Loss_fn = torch.nn.MSELoss(size_average=None, reduce=None, reduction="mean")
+
+    def _compute_cost(self, logits, targets):
+        # compute cost with MSE
+        loss=self.Loss_fn(logits, targets)
+        return loss
+
+    def mdn_loss(self, y_true, mu, sigma, pi=1):
+        pass
