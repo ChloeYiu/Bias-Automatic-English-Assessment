@@ -28,7 +28,7 @@ if [ -f $LOG ]; then
 fi
 declare -a seeds=(10 30 50 70 90)
 
-if [ "$model" == "DDN" ]; then
+if [[ "$model" == "DDN" || "$model" == "DDN_BERT" ]]; then
   pred_file_suffix="pred_ref.txt"
 elif [ "$model" == "DNN" ]; then
   pred_file_suffix="pred.txt"
@@ -39,12 +39,12 @@ fi
 
 for part in 1; do
   for seed in "${seeds[@]}"; do   
-    python local/training/${model}_score.py \
+    python local/training/$score.py \
       --pred_file ./${model}/ALTA/ASR_V2.0.0/${train_data}/f4-ppl-c2-pdf/part${part}/${model}_${seed}/${test_data}/${test_data}_${pred_file_suffix} \
-      --calib_model ./${model}/ALTA/ASR_V2.0.0/${train_data}/f4-ppl-c2-pdf/part${part}/${model}_${seed}/${calib_data}/calib_model.pkl;
+      --calib_model ./${model}/ALTA/ASR_V2.0.0/${train_data}/f4-ppl-c2-pdf/part${part}/${model}_${seed}/${calib_data}/calib_model.pkl --model_type $model;
   done
 
-  python local/training/${model}_score.py \
+  python local/training/$score.py \
   --pred_file ./${model}/ALTA/ASR_V2.0.0/${train_data}/f4-ppl-c2-pdf/part${part}/ens_${test_data}/${test_data}_${pred_file_suffix} \
-  --calib_model ./${model}/ALTA/ASR_V2.0.0/${train_data}/f4-ppl-c2-pdf/part${part}/ens_${test_data}/calib_model.pkl;
+  --calib_model ./${model}/ALTA/ASR_V2.0.0/${train_data}/f4-ppl-c2-pdf/part${part}/ens_${test_data}/calib_model.pkl --model_type $model;
 done

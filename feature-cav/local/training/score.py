@@ -32,11 +32,12 @@ def Convert_tensors_Compute_Metrics(X_data, y_data):
 #--------------------------------------------------------
 
 def main(cfg):
+    model_type = cfg.model_type
 
     if not os.path.isdir('CMDs'):
         os.mkdir('CMDs')
 
-    with open('CMDs/DDN_score.cmds', 'a') as f:
+    with open(f'CMDs/{model_type}_score.cmds', 'a') as f:
         f.write(' '.join(sys.argv) + '\n')
         f.write('--------------------------------\n')
 
@@ -66,8 +67,12 @@ def main(cfg):
 
     #--------------------------------------------------
     uncalib_df = Pd.read_csv(score_file, delimiter=' ')
-    y_data = np.array(uncalib_df['tgt_mu'])
-    X_data = np.array(uncalib_df['pred_mu'])
+    if model_type == 'DNN':
+        y_data = np.array(uncalib_df['tgt'])
+        X_data = np.array(uncalib_df['pred'])
+    else:
+        y_data = np.array(uncalib_df['tgt_mu'])
+        X_data = np.array(uncalib_df['pred_mu'])
     uncalibrated_metrics = Convert_tensors_Compute_Metrics(X_data, y_data)
 
     with open(os.path.join(working_dir, 'uncalib_results.json'), 'w') as fp:
@@ -97,12 +102,14 @@ def main(cfg):
         summary_df = Pd.DataFrame([{ key:round(calibrated_metrics[key], 3) for key in metrics}])
         f.write(tabulate(summary_df, headers='keys', tablefmt='grid'))
 
-    uncalib_df = uncalib_df.drop(columns=['pred_mu'])
+    if model_type == 'DNN':
+        uncalib_df = uncalib_df.drop(columns=['pred'])
+        output_predictions=os.path.join(working_dir,fname.replace('_pred','_calib_pred.txt'))
+    else:
+        uncalib_df = uncalib_df.drop(columns=['pred_mu'])
+        output_predictions=os.path.join(working_dir,fname.replace('_pred_ref','_calib_pred_ref.txt'))
 
-    output_predictions=os.path.join(working_dir,fname.replace('_pred_ref','_calib_pred_ref.txt'))
     uncalib_df.to_csv(output_predictions, sep=' ', index=False)
-
-
 
 if __name__ == '__main__':
     import sys
@@ -114,6 +121,7 @@ if __name__ == '__main__':
 
     # Initialize the argument parser
     parser = argparse.ArgumentParser(description='')
+    parser.add_argument('--model_type', type=str, required=True, help='Model type')
     parser.add_argument('--pred_file', type=str, required=True, help='')
     parser.add_argument('--calib_model', type=str, required=True, help='')
     cfg = parser.parse_args()
