@@ -25,7 +25,7 @@ def main(cfg):
     parent_dir = Path(cfg.ensemble_dir)
     dirs = [str(d) for d in parent_dir.glob(f'{model_type}*') if d.is_dir()]
 
-    if model_type == 'DNN':
+    if model_type.startswith('DNN'):
         uncalib_files = [os.path.join(d, cfg.dataname, cfg.dataname + '_pred.txt') for d in dnn_dirs]
         calib_files = [os.path.join(d, cfg.dataname, cfg.dataname + '_calib_pred.txt') for d in dnn_dirs]
     else:
@@ -57,7 +57,7 @@ def main(cfg):
     df_divided = df_grouped.div(df_divisors)
     df_divided = df_divided.reset_index()
 
-    if model_type == 'DNN':
+    if model_type.startswith('DNN'):
         output_predictions = os.path.join(working_dir, cfg.dataname + '_pred.txt')
     else:
         output_predictions = os.path.join(working_dir, cfg.dataname + '_pred_ref.txt')

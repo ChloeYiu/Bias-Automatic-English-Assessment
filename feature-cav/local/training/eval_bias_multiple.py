@@ -38,9 +38,9 @@ def main(args):
             distance_file = f"{top_dir}/bias/{cav_set}/{bias}/{bias_set}/bias_part{part}_{seed}_input_layer.txt"
         gradient_file = f"{top_dir}/gradients/{bias_set}/gradients_part{part}_{seed}_input_layer.txt"
 
-        if model_name == 'DNN':
+        if model_name.startswith('DNN'):
             pred_file = f"{top_dir}/f4-ppl-c2-pdf/part{part}/{seed}/{bias_set}/{bias_set}_pred.txt"
-        elif model_name == 'DDN':
+        elif model_name.startswith('DDN'):
             pred_file = f"{top_dir}/f4-ppl-c2-pdf/part{part}/{seed}/{bias_set}/{bias_set}_pred_ref.txt"
         else: 
             raise ValueError('Model name not found')
@@ -58,10 +58,12 @@ def main(args):
 
         print(f'Overall distance: {overall_distance}')
         print(f'Average individual distance: {avg_individual_distance}')
-        if model_name == 'DNN':
+        if model_name.startswith('DNN'):
             bias_multiple.scores_list.append(bias_plotter.read_raw_score('pred'))
-        elif model_name == 'DDN':
+        elif model_name.startswith('DDN'):
             bias_multiple.scores_list.append(bias_plotter.read_raw_score('pred_mu'))
+        else:
+            raise ValueError('Model name not found')
         bias_multiple.overall_distance_list.append(overall_distance)
         bias_multiple.individual_distance_list.append(individual_distance)
         bias_multiple.avg_individual_distance_list.append(avg_individual_distance)

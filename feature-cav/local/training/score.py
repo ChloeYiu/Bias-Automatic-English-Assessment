@@ -67,7 +67,7 @@ def main(cfg):
 
     #--------------------------------------------------
     uncalib_df = Pd.read_csv(score_file, delimiter=' ')
-    if model_type == 'DNN':
+    if model_type.startswith('DNN'):
         y_data = np.array(uncalib_df['tgt'])
         X_data = np.array(uncalib_df['pred'])
     else:
@@ -102,7 +102,7 @@ def main(cfg):
         summary_df = Pd.DataFrame([{ key:round(calibrated_metrics[key], 3) for key in metrics}])
         f.write(tabulate(summary_df, headers='keys', tablefmt='grid'))
 
-    if model_type == 'DNN':
+    if model_type.startswith('DNN'):
         uncalib_df = uncalib_df.drop(columns=['pred'])
         output_predictions=os.path.join(working_dir,fname.replace('_pred','_calib_pred.txt'))
     else:

@@ -114,7 +114,7 @@ def main(cfg):
     encoded_uttids = torch.tensor(encoded_uttids, dtype=torch.long)
     dev_dataset = TensorDataset(torch.tensor(dev_feat).float(), torch.tensor(dev_labels).float(), encoded_uttids)
     
-    if model_type == 'DNN':
+    if model_type.startswith('DNN'):
         pred, tgt, eval_uttlist = model.evaluate(dev_dataset, activation_getter)
             with open(os.path.join(working_dir, f'{dataname}_pred.txt'), 'w') as pred_file:
             pred_file.write("uttid pred tgt\n")

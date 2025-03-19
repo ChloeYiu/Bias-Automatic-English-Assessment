@@ -27,13 +27,14 @@ def main(args):
     bias_all = BiasAllGrad(config_parser, config_list)
 
     top_name = f"{top_dir}/bias/{cav_set}/{bias_set}_bias_part{part}"
+    model_name_space = model_name.replace('_', ' ')
 
     if class_weight:
         plot_file = f"{top_name}_{layer}_{class_weight}.png"
-        plot_title = f"Feature {model_name} - Balanced Weighting"
+        plot_title = f"Feature {model_name_space} - Balanced Weighting"
     else:
         plot_file = f"{top_name}_{layer}.png"
-        plot_title = f"Feature {model_name} - No Weighting"
+        plot_title = f"Feature {model_name_space} - No Weighting"
 
     for concept in config_list:
         top_concept_name = f"{top_dir}/bias/{cav_set}/{concept}/{bias_set}/bias_part{part}"
@@ -44,17 +45,17 @@ def main(args):
             else:
                 distance_file = f"{top_concept_name}_{seed}_{layer}.txt"
 
-            if model_name == 'DNN':
+            if model_name.startswith('DNN'):
                 pred_file = f"{top_dir}/f4-ppl-c2-pdf/part{part}/{seed}/{bias_set}/{bias_set}_pred.txt"
-            elif model_name == 'DDN':
+            elif model_name.startswith('DDN'):
                 pred_file = f"{top_dir}/f4-ppl-c2-pdf/part{part}/{seed}/{bias_set}/{bias_set}_pred_ref.txt"
             else:
                 raise ValueError('Model name not found')
 
             score_reader = BiasTool(pred_file)
-            if model_name == 'DNN':
+            if model_name.startswith('DNN'):
                 raw_score = score_reader.read_raw_score('pred')
-            elif model_name == 'DDN':
+            elif model_name.startswith('DDN'):
                 raw_score = score_reader.read_raw_score('pred_mu')
             else:
                 raise ValueError('Model name not found')
