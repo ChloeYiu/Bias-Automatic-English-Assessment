@@ -21,16 +21,16 @@ test_data=$2
 calib_data=$3
 model=$4
 
-LOG=Logs/run/process_data.log
+LOG=Logs/run/scores.log
 mkdir -p $(dirname $LOG)
 if [ -f $LOG ]; then
     \rm $LOG
 fi
 declare -a seeds=(10 30 50 70 90)
 
-if [ "$model" == DDN* ]; then
+if [[ "$model" =~ ^DDN ]]; then
   pred_file_suffix="pred_ref.txt"
-elif [ "$model" == DNN* ]; then
+elif [[ "$model" =~ ^DNN ]]; then
   pred_file_suffix="pred.txt"
 else
   echo "Unknown model: $model"
@@ -39,12 +39,12 @@ fi
 
 for part in 1; do
   for seed in "${seeds[@]}"; do   
-    python local/training/$score.py \
+    python local/training/score.py \
       --pred_file ./${model}/ALTA/ASR_V2.0.0/${train_data}/f4-ppl-c2-pdf/part${part}/${model}_${seed}/${test_data}/${test_data}_${pred_file_suffix} \
       --calib_model ./${model}/ALTA/ASR_V2.0.0/${train_data}/f4-ppl-c2-pdf/part${part}/${model}_${seed}/${calib_data}/calib_model.pkl --model_type $model;
   done
 
-  python local/training/$score.py \
+  python local/training/score.py \
   --pred_file ./${model}/ALTA/ASR_V2.0.0/${train_data}/f4-ppl-c2-pdf/part${part}/ens_${test_data}/${test_data}_${pred_file_suffix} \
   --calib_model ./${model}/ALTA/ASR_V2.0.0/${train_data}/f4-ppl-c2-pdf/part${part}/ens_${test_data}/calib_model.pkl --model_type $model;
 done

@@ -116,7 +116,7 @@ def main(cfg):
     
     if model_type.startswith('DNN'):
         pred, tgt, eval_uttlist = model.evaluate(dev_dataset, activation_getter)
-            with open(os.path.join(working_dir, f'{dataname}_pred.txt'), 'w') as pred_file:
+        with open(os.path.join(working_dir, f'{dataname}_pred.txt'), 'w') as pred_file:
             pred_file.write("uttid pred tgt\n")
             for p, utt_idx, t in zip(pred, eval_uttlist, tgt):
 

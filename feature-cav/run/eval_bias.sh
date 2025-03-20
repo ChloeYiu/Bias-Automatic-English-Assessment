@@ -37,7 +37,7 @@ trainset=$1
 cavset=$2
 testset=$3
 profile=$4
-config_file="DDN/ALTA/ASR_V2.0.0/arguments.conf"
+config_file=arguments.conf
 
 # Check if config file exists
 if [ ! -f "$config_file" ]; then

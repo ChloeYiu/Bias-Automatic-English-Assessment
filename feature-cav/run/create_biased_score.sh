@@ -22,7 +22,7 @@ biased_feature_template="$biased_file_dir/features.txt"
 parts=(1)
 
 train_set="LIESTgrp06"
-config_file=DDN/ALTA/ASR_V2.0.0/$train_set/arguments.conf
+config_file=arguments.conf
 profile=$1
 
 # Function to load configuration

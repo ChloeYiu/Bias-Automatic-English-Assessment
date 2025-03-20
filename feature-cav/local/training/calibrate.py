@@ -49,7 +49,7 @@ def main(cfg):
     #--------------------------------------------------
     uncalib_df = Pd.read_csv(pred_file, delimiter=' ')
     if model_type.startswith('DNN'):
-         y_data = np.array(uncalib_df['tgt'])
+        y_data = np.array(uncalib_df['tgt'])
         X_data = np.array(uncalib_df['pred'])
     else:
         y_data = np.array(uncalib_df['tgt_mu'])
