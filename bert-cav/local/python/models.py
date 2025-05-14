@@ -66,3 +66,28 @@ class BERTGrader(nn.Module):
         repeated_w = torch.unsqueeze(w, -1).expand(-1,-1, embeddings.size(-1))
         x_attn = torch.sum(embeddings*repeated_w, dim=1)
         return x_attn
+
+class BERTFeatureGrader(BERTGrader):
+    def __init__(self, h1_dim=600, h2_dim=20, embedding_size=768, feature_size=356):
+        super().__init__(h1_dim=h1_dim, h2_dim=h2_dim, embedding_size=embedding_size)
+        self.layer1 = torch.nn.Linear(embedding_size*4 + feature_size, h1_dim)
+        self.feature_size = feature_size
+
+    def forward(self, input_ids, input_array):
+        attention_mask = input_array[:,:-self.feature_size]
+        feature = input_array[:,-self.feature_size:]
+
+        output = self.encoder(input_ids, attention_mask)
+        word_embeddings = output.last_hidden_state
+
+        head1 = self._apply_attn(word_embeddings, attention_mask, self.attn1)
+        head2 = self._apply_attn(word_embeddings, attention_mask, self.attn2)
+        head3 = self._apply_attn(word_embeddings, attention_mask, self.attn3)
+        head4 = self._apply_attn(word_embeddings, attention_mask, self.attn4)
+
+        all_heads_and_feature = torch.cat((head1, head2, head3, head4, feature), dim=1)
+
+        h1 = self.layer1(all_heads_and_feature).clamp(min=0)
+        h2 = self.layer2(h1).clamp(min=0)
+        y = self.layer3(h2).squeeze(dim=-1)
+        return y

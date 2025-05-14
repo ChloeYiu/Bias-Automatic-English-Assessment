@@ -23,6 +23,11 @@ while [ $# -gt 0 ]; do
         condaenv=$1
 	shift
         ;; 
+        --feature_dir)
+	shift
+        feature_dir=$1
+	shift
+        ;; 
         *)
         POSITIONAL+=("$1")
         shift
@@ -35,7 +40,7 @@ set -- "${POSITIONAL[@]}"
 if [[ $# -ne 5 ]]; then
    echo "Usage: $0 [--condaenv path] responses_dir tset top_outdir part seed"
    echo "  e.g: ./local/tools/train_grader.sh /scratches/dialfs/alta/linguaskill/grd-graphemic-st941/neural-text/Wspt-D3/data/LIESTtrn04 LIESTtrn04 Wspt-D3 1 1"
-   echo "  e.g. ./local/tools/train_grader.sh /data/milsrg1/alta/linguaskill/relevance_v2/LIESTgrp06 LIESTgrp06 est 4 37"
+   echo "  e.g. ./local/tools/train_grader.sh /data/milsrg1/alta/linguaskill/relevance_v2/LIESTgrp06 LIESTgrp06 est 4 37 --feature_dir feature-cav/data/ALTA/ASR_V2.0.0/LIESTgrp06/f4-ppl-c2-pdf/part1/features.txt"
    echo ""
    exit 100
 fi
@@ -55,6 +60,11 @@ fi
 SCORES=$SRC/$TSET.scores.txt
 if [ ! -f $SCORES ]; then
     echo "ERROR: scores not found: $SCORES"
+    exit 100
+fi
+FEATURE=$feature_dir/part$PART/features.txt
+if [ -n "$feature_dir" ] && [ ! -f "$FEATURE" ]; then
+    echo "ERROR: features not found: $FEATURE"
     exit 100
 fi
 
@@ -83,8 +93,13 @@ opts=""
 mkdir -p $top_outdir/${TSET}/trained_models/part${PART}
     # for SEED in $(seq $SEED_START $SEED_END); do
 echo "PART=$PART, SEED=$SEED"
-OUT=$top_outdir/${TSET}/trained_models/part${PART}/bert_part${PART}_seed${SEED}.th
+if [ -n "$feature_dir" ]; then
+    OUT=$top_outdir/${TSET}_feature/trained_models/part${PART}/bert_part${PART}_seed${SEED}.th
+else
+    OUT=$top_outdir/${TSET}/trained_models/part${PART}/bert_part${PART}_seed${SEED}.th
+fi
+
 echo OUT=$OUT
 
-echo python local/python/train.py $opts --OUT=$OUT --RESPONSES=$RESPONSES --GRADES=$SCORES --seed=$SEED --part=$PART
-python local/python/train.py $opts  --OUT=$OUT --RESPONSES=$RESPONSES --GRADES=$SCORES --seed=$SEED --part=$PART --B=8 --epochs=2 --sch=1
+echo python local/python/train.py $opts --OUT=$OUT --RESPONSES=$RESPONSES --GRADES=$SCORES --seed=$SEED --part=$PART --FEATURE=$FEATURE
+python local/python/train.py $opts  --OUT=$OUT --RESPONSES=$RESPONSES --GRADES=$SCORES --seed=$SEED --part=$PART --FEATURE=$FEATURE --B=8 --epochs=2 --sch=1

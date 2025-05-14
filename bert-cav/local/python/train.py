@@ -8,7 +8,7 @@ import sys
 import os
 import argparse
 from tools import AverageMeter, get_default_device
-from models import BERTGrader
+from models import BERTGrader, BERTFeatureGrader
 
 def makeDir (name, mustBeNew):
     try:
@@ -91,6 +91,7 @@ if __name__ == "__main__":
     commandLineParser.add_argument('--OUT', type=str, help='Specify output th file')
     commandLineParser.add_argument('--RESPONSES', type=str, help='responses text file')
     commandLineParser.add_argument('--GRADES', type=str, help='scores text file')
+    commandLineParser.add_argument('--FEATURE', type=str, default='', help='feature text file')
     commandLineParser.add_argument('--B', type=int, default=16, help="Specify batch size")
     commandLineParser.add_argument('--epochs', type=int, default=3, help="Specify epochs")
     commandLineParser.add_argument('--lr', type=float, default=0.00001, help="Specify learning rate")
@@ -98,12 +99,14 @@ if __name__ == "__main__":
     commandLineParser.add_argument('--seed', type=int, default=1, help="Specify seed")
     commandLineParser.add_argument('--part', type=int, default=3, help="Specify part of exam")
     commandLineParser.add_argument('--val_size', type=int, default=500, help="Specify validation set size")
+    commandLineParser.add_argument('--feature_size', type=int, default=356, help="Specify GPU id")
 
 
     args = commandLineParser.parse_args()
     out_file = args.OUT
     responses_file = args.RESPONSES
     grades_file = args.GRADES
+    feature_file = args.FEATURE
     batch_size = args.B
     epochs = args.epochs
     lr = args.lr
@@ -111,6 +114,7 @@ if __name__ == "__main__":
     seed = args.seed
     part = args.part
     val_size = args.val_size
+    feature_size = args.feature_size
 
 
     torch.manual_seed(seed)
@@ -127,7 +131,34 @@ if __name__ == "__main__":
     device = get_default_device()
 
     # Load the data
-    input_ids, mask, labels, _ = get_data(responses_file, grades_file, part=part)
+    input_ids, mask, labels, speaker_ids = get_data(responses_file, grades_file, part=part)
+
+    # If feature file is provided, load the features
+    if feature_file:
+        feature_dict = {}
+        with open(feature_file, 'r') as f:
+            features = f.readlines()[1:]  # Read from line 2
+        features = [line.strip().split() for line in features]
+        for line in features:
+            speakerid = line[0]
+            feature = torch.tensor(list(map(float, line[1:])), dtype=torch.float)
+            feature_dict[speakerid] = feature
+
+        new_speaker_ids = []
+        new_mask = []
+        for speaker_id, mask_item in zip(speaker_ids, mask):
+            if speaker_id not in feature_dict:
+                print(f"Skipping {speaker_id}: speaker_id not found in feature_dict")
+            elif len(feature_dict[speaker_id]) != feature_size:
+                print(f"Skipping {speaker_id}: feature size mismatch")
+            else:
+                new_speaker_ids.append(speaker_id)
+                concatenated_mask = torch.cat((mask_item, feature_dict[speaker_id]), dim=0)
+                new_mask.append(concatenated_mask)
+
+        print("Original mask size:", len(mask), len(mask[0]))
+        print("New mask size:", len(new_mask), len(new_mask[0]))
+        speaker_ids, mask = new_speaker_ids, torch.stack(new_mask)
 
     # split into training and validation sets
     input_ids_val = input_ids[:val_size]
@@ -146,7 +177,10 @@ if __name__ == "__main__":
     val_dl = DataLoader(val_ds, batch_size=batch_size)
 
     # initialise grader
-    model = BERTGrader()
+    if feature_file:
+        model = BERTFeatureGrader(feature_size=feature_size)
+    else:
+        model = BERTGrader()
     model.to(device)
 
     # Optimizer

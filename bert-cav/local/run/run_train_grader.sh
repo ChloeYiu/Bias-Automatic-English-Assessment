@@ -27,14 +27,20 @@ while [ $# -gt 0 ]; do
         --part_range)
         cmdopts="$cmdopts $1 $2"
         part_range=$2
-        shift
-        shift
+    shift
+    shift
         ;; 
         --seed_range)
         cmdopts="$cmdopts $1 $2"
         seed_range=$2
-        shift
-        shift
+    shift
+    shift
+        ;;
+        --feature)
+        cmdopts="$cmdopts $1 $2"
+        feature=$2
+    shift
+    shift
         ;;
 
     *)
@@ -50,7 +56,7 @@ set -- "${POSITIONAL[@]}"
 if [[ $# -lt 3 || $# -gt 4 ]]; then
    echo "Usage: $0 [--hte] [--condaenv path] [--part_range start:end] [--seed_range start:end] responses_dir tset top_outputdir [jwait]"
    echo "  e.g: $0 --part_range 1:5 --seed_range 1:10 /scratches/dialfs/alta/linguaskill/grd-graphemic-st941/neural-text/Wspt-D3/data/LIESTtrn04 LIESTtrn04 predictions/Wspt-D3"
-   echo "  e.g: $0 --part_range 1:5 --seed_range 1:10 /data/milsrg1/alta/linguaskill/relevance_v2/LIESTgrp06 LIESTgrp06 est"
+   echo "  e.g: $0 --part_range 1:1 --seed_range 1:5 /data/milsrg1/alta/linguaskill/relevance_v2/LIESTgrp06 LIESTgrp06 est --feature /research/milsrg1/alta/linguaskill/exp-ymy23/feature-cav/data/ALTA/ASR_V2.0.0/LIESTgrp06/f4-ppl-c2-pdf"
    echo ""
    exit 100
 fi
@@ -96,10 +102,19 @@ echo "seed_range: $seed_range"
 
 for PART in $(seq $(echo $part_range | cut -d':' -f1) $(echo $part_range | cut -d':' -f2)); do
     mkdir -p $top_outdir/${TSET}/trained_models/part${PART}
-    mkdir -p LOGs/$top_outdir/${TSET}/part${PART}
+    if [ -n $feature ]; then
+        log_dir=LOGs/$top_outdir/${TSET}_feature/part${PART}
+    else
+        log_dir=LOGs/$top_outdir/${TSET}/part${PART}
+    fi
+    mkdir -p $log_dir
     for SEED in $(seq $(echo $seed_range | cut -d':' -f1) $(echo $seed_range | cut -d':' -f2)); do
-        
-        cmdopts="$SRC $TSET $top_outdir $PART $SEED"
+
+        if [ -n $feature ]; then
+            cmdopts="$SRC $TSET $top_outdir $PART $SEED --feature_dir $feature"
+        else
+            cmdopts="$SRC $TSET $top_outdir $PART $SEED"
+        fi
         
         OUT=$top_outdir/${TSET}/trained_models/part${PART}/bert_part${PART}_seed${SEED}.th
         echo OUT=$OUT
@@ -127,7 +142,7 @@ for PART in $(seq $(echo $part_range | cut -d':' -f1) $(echo $part_range | cut -
         fi
 
         bin=./local/tools/train_grader.sh 
-        LOG=LOGs/$top_outdir/${TSET}/part${PART}/train_grader_seed${SEED}.LOG
+        LOG=$log_dir/train_grader_seed${SEED}.LOG
         if [ -f $LOG ]; then
             \rm $LOG
         fi
