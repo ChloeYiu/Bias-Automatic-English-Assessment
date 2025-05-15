@@ -9,10 +9,10 @@ torch.cuda.empty_cache()
 import torch.nn as nn
 from torch.utils.data import TensorDataset
 from torch.utils.data import DataLoader
-from data_prep import get_data
+from data_prep import get_data, get_mask_with_feature
 import argparse
 from tools import AverageMeter, get_default_device, calculate_rmse, calculate_pcc, calculate_less1, calculate_less05, calculate_avg, calculate_src, calculate_krc
-from models import BERTGrader
+from models import BERTGrader, BERTFeatureGrader
 import statistics
 
 from path import makeDir, checkDirExists, checkFileExists
@@ -119,8 +119,10 @@ def main(args):
     activation_dir = args.ACTIVATION_DIR
     gradient_dir = args.GRADIENT_DIR
     grades_file = args.GRADES
+    feature_file = args.FEATURE
     batch_size = args.B
     part=args.part
+    feature_size = args.feature_size
 
     for model_path in model_paths:
         print('model_path ' + model_path)
@@ -140,13 +142,17 @@ def main(args):
     # Load the data
     input_ids, mask, labels, speakerids = get_data(responses_file, grades_file, part=part)
     print(len(labels))
+
+    if feature_file:
+        speakerids, mask = get_mask_with_feature(feature_file, speakerids, mask, feature_size)
+        
     test_ds = TensorDataset(input_ids, mask, labels)
     test_dl = DataLoader(test_ds, batch_size=batch_size)
 
     # Load the models
     models = []
     for model_path in model_paths:
-        model = BERTGrader()
+        model = BERTFeatureGrader(feature_size=feature_size) if feature_file else BERTGrader()
         model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
         model.to(device)
         models.append(model)
@@ -235,7 +241,9 @@ if __name__ == "__main__":
     commandLineParser.add_argument('ACTIVATION_DIR', type=str, help='directory to store activations')
     commandLineParser.add_argument('GRADIENT_DIR', type=str, help='directory to store gradients')
     commandLineParser.add_argument('--B', type=int, default=16, help="Specify batch size")
+    commandLineParser.add_argument('--FEATURE', type=str, default='', help="Specify test feature file")
     commandLineParser.add_argument('--part', type=int, default=3, help="Specify part of exam")
+    commandLineParser.add_argument('--feature_size', type=int, default=356, help="Specify feature size")
 
     args = commandLineParser.parse_args()
     main (args)

@@ -11,6 +11,8 @@ condaenv=/scratches/dialfs/kmk/anaconda3/envs/whisper39
 PART_START=1
 PART_END=5
 
+feature=false
+
 # look for optional arguments
 while [ $# -gt 0 ]; do
     key=$1
@@ -30,7 +32,11 @@ while [ $# -gt 0 ]; do
 	    shift
         profile=$1
 	    shift
-        ;; 
+        ;; --feature)
+        cmdopts="$cmdopts $1"
+        feature=true
+        shift
+        ;;
     *)
     POSITIONAL+=("$1")
     shift
@@ -41,8 +47,10 @@ set -- "${POSITIONAL[@]}"
 
 # Check Number of Args
 if [[ $# -ne 4 ]]; then
-   echo "Usage: $0 [--condaenv path] [--part_range start:end] [--biased_TSET profile] responses_dir tset top_outdir trainset"
+   echo "Usage: $0 [--condaenv path] [--part_range start:end] [--biased_TSET profile] [--feature] responses_dir tset top_outdir trainset"
    echo "  e.g: ./local/run/run_eval_ensemble_with_hooks.sh --part_range 1:1 --biased_TSET grade_C /data/milsrg1/alta/linguaskill/relevance_v2/LIESTgrp06 LIESTgrp06 est LIESTgrp06_grade_C"
+    echo "  e.g: ./local/run/run_eval_ensemble_with_hooks.sh --part_range 1:1 --feature /data/milsrg1/alta/linguaskill/relevance_v2/LIESTgrp06 LIESTgrp06 est LIESTgrp06"
+
    echo ""
    exit 100
 fi
@@ -52,6 +60,9 @@ TSET=$2
 top_outdir=$3
 trainset=$4
 
+if [ $feature ]; then
+    trainset=${trainset}_feature
+fi
 
 # check files exist
 RESPONSES=$SRC/$TSET.responses.txt
@@ -108,6 +119,14 @@ for PART in $(seq $PART_START $PART_END); do
     echo "PART=$PART"
     echo "MODELS=$MODELS"
 
+    if [ $feature ]; then
+        FEATURE=/research/milsrg1/alta/linguaskill/exp-ymy23/feature-cav/data/ALTA/ASR_V2.0.0/$TSET/f4-ppl-c2-pdf/part$PART/features.txt
+        if [ ! -f "$FEATURE" ]; then
+            echo "ERROR: test features not found: $FEATURE"
+            exit 100
+        fi
+    fi
+
     mkdir -p $topdir/predictions/$TSET/part${PART}
     OUT=$topdir/predictions/$TSET/part${PART}
     ACTIVATION_DIR=$topdir/activations/$TSET/part${PART}
@@ -116,12 +135,14 @@ for PART in $(seq $PART_START $PART_END); do
     echo "ACTIVATION_DIR=$ACTIVATION_DIR"
     echo "GRADIENT_DIR=$GRADIENT_DIR"
     echo "SCORES=$SCORES"
-    #echo python /scratches/dialfs/alta/linguaskill/grd-graphemic-st941/neural-text/scripts/eval_ensemble.py $opts MODELS=$MODELS RESPONSES=$RESPONSES GRADES=$SCORES OUT=$OUT  --part=$PART
     log_file=LOGs/$topdir/predictions/$TSET/preds_bert_part${PART}.LOG
     
     echo "Logging to: $log_file"
-    python local/python/eval_ensemble_with_hooks.py $opts "$MODELS" $RESPONSES $SCORES $OUT $ACTIVATION_DIR $GRADIENT_DIR --part=$PART --B=8 >& $log_file
-    # python ./NeurTxt_LIEST/eval_ensemble.py $opts "${MODELS[@]}" $RESPONSES $SCORES $OUT --part=$PART --B=8 > LOGs/$top_outdir/${trainset}_preds/preds_${TSET}_part${PART}.LOG
+    if [ $feature ]; then
+        python local/python/eval_ensemble_with_hooks.py $opts "$MODELS" $RESPONSES $SCORES $OUT $ACTIVATION_DIR $GRADIENT_DIR --part=$PART --B=8 --FEATURE=$FEATURE >& $log_file
+    else
+        python local/python/eval_ensemble_with_hooks.py $opts "$MODELS" $RESPONSES $SCORES $OUT $ACTIVATION_DIR $GRADIENT_DIR --part=$PART --B=8 >& $log_file
+    fi
     echo "Hook done"
 done
 
