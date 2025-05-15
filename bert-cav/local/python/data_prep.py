@@ -74,3 +74,29 @@ def get_data(responses_file, grades_file, part=1):
     input_ids, mask = tokenize_text(utts)
     labels = torch.FloatTensor(grades)
     return input_ids, mask, labels, speaker_ids
+
+def get_mask_with_feature(feature_file, speaker_ids, mask, feature_size):
+    feature_dict = {}
+    with open(feature_file, 'r') as f:
+        features = f.readlines()[1:]  # Read from line 2
+    features = [line.strip().split() for line in features]
+    for line in features:
+        speakerid = line[0]
+        feature = torch.tensor(list(map(float, line[1:])), dtype=torch.float)
+        feature_dict[speakerid] = feature
+
+    new_speaker_ids = []
+    new_mask = []
+    for speaker_id, mask_item in zip(speaker_ids, mask):
+        if speaker_id not in feature_dict:
+            print(f"Skipping {speaker_id}: speaker_id not found in feature_dict")
+        elif len(feature_dict[speaker_id]) != feature_size:
+            print(f"Skipping {speaker_id}: feature size mismatch")
+        else:
+            new_speaker_ids.append(speaker_id)
+            concatenated_mask = torch.cat((mask_item, feature_dict[speaker_id]), dim=0)
+            new_mask.append(concatenated_mask)
+
+    print("Original mask size:", len(mask), len(mask[0]))
+    print("New mask size:", len(new_mask), len(new_mask[0]))
+    return new_speaker_ids, torch.stack(new_mask)

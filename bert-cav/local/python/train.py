@@ -3,7 +3,7 @@ import torch.nn as nn
 from torch.utils.data import TensorDataset
 from torch.utils.data import DataLoader
 from transformers import AdamW
-from data_prep import get_data
+from data_prep import get_data, get_mask_with_feature
 import sys
 import os
 import argparse
@@ -99,7 +99,7 @@ if __name__ == "__main__":
     commandLineParser.add_argument('--seed', type=int, default=1, help="Specify seed")
     commandLineParser.add_argument('--part', type=int, default=3, help="Specify part of exam")
     commandLineParser.add_argument('--val_size', type=int, default=500, help="Specify validation set size")
-    commandLineParser.add_argument('--feature_size', type=int, default=356, help="Specify GPU id")
+    commandLineParser.add_argument('--feature_size', type=int, default=356, help="Specify feature size")
 
 
     args = commandLineParser.parse_args()
@@ -135,30 +135,7 @@ if __name__ == "__main__":
 
     # If feature file is provided, load the features
     if feature_file:
-        feature_dict = {}
-        with open(feature_file, 'r') as f:
-            features = f.readlines()[1:]  # Read from line 2
-        features = [line.strip().split() for line in features]
-        for line in features:
-            speakerid = line[0]
-            feature = torch.tensor(list(map(float, line[1:])), dtype=torch.float)
-            feature_dict[speakerid] = feature
-
-        new_speaker_ids = []
-        new_mask = []
-        for speaker_id, mask_item in zip(speaker_ids, mask):
-            if speaker_id not in feature_dict:
-                print(f"Skipping {speaker_id}: speaker_id not found in feature_dict")
-            elif len(feature_dict[speaker_id]) != feature_size:
-                print(f"Skipping {speaker_id}: feature size mismatch")
-            else:
-                new_speaker_ids.append(speaker_id)
-                concatenated_mask = torch.cat((mask_item, feature_dict[speaker_id]), dim=0)
-                new_mask.append(concatenated_mask)
-
-        print("Original mask size:", len(mask), len(mask[0]))
-        print("New mask size:", len(new_mask), len(new_mask[0]))
-        speaker_ids, mask = new_speaker_ids, torch.stack(new_mask)
+        speaker_ids, mask = get_mask_with_feature(feature_file, speaker_ids, mask, feature_size)
 
     # split into training and validation sets
     input_ids_val = input_ids[:val_size]
@@ -177,10 +154,7 @@ if __name__ == "__main__":
     val_dl = DataLoader(val_ds, batch_size=batch_size)
 
     # initialise grader
-    if feature_file:
-        model = BERTFeatureGrader(feature_size=feature_size)
-    else:
-        model = BERTGrader()
+    model = BERTFeatureGrader(feature_size=feature_size) if feature_file else BERTGrader()
     model.to(device)
 
     # Optimizer
