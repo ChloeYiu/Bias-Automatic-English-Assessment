@@ -10,6 +10,7 @@ from tools import calculate_rmse, calculate_pcc, calculate_less1, calculate_less
 
 from path import makeDir, checkDirExists, checkFileExists
 from cmdlog import makeCmdPath
+import statistics
 
 def get_single_stats(all_preds, targets):
     rmses = []
@@ -126,7 +127,7 @@ def main (args):
         preds.append(pred_overall)
 
         # Get single stats (over all models)
-    rmse_mean, rmse_std, pcc_mean, pcc_std, avg_mean, avg_std, less05_mean, less05_std, less1_mean, less1_std, src_mean, src_std, krc_mean, krc_std = get_single_stats(all_preds, targets)
+    rmse_mean, rmse_std, pcc_mean, pcc_std, avg_mean, avg_std, less05_mean, less05_std, less1_mean, less1_std, src_mean, src_std, krc_mean, krc_std = get_single_stats(preds, refs)
     print("STATS FOR ", model_paths)
     print()
     print("\nOVERALL SINGLE STATS\n")
