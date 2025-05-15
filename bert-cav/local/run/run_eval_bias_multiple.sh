@@ -54,7 +54,7 @@ done
 set -- "${POSITIONAL[@]}"
 
 if [[ $# -ne 5 ]]; then
-   echo "Usage: $0 [--condaenv path] [--part_range start:end] [--seed_range start:end] [--layer_range start:end] [--class_weight weight] biasset top_outdir trainset cavset"
+   echo "Usage: $0 [--condaenv path] [--part_range start:end] [--seed_range start:end] [--layer_range start:end] [--class_weight weight] biasset top_outdir trainset cavset profile"
    echo "  e.g: ./local/run/run_eval_bias_multiple.sh LIESTdev02 est LIESTgrp06 LIESTgrp06 thai"
    echo ""
    exit 100

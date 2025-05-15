@@ -12,6 +12,7 @@ def main(args):
     class_weight = args.CLASS_WEIGHT if args.CLASS_WEIGHT == 'balanced' else None
     part = args.PART
     seed_range = args.SEED
+    title = args.TITLE
 
     config_file = args.CONFIG_FILE  
     config_parser = configparser.ConfigParser()
@@ -30,10 +31,10 @@ def main(args):
 
     if class_weight:
         plot_file = f"{top_name}/bias_all_bert_part{part}_layer{layer}_{class_weight}.png"
-        plot_title = "BERT - Balanced Weighting"
+        plot_title = f"{title} - Balanced Weighting"
     else:
         plot_file = f"{top_name}/bias_all_bert_part{part}_layer{layer}.png"
-        plot_title = "BERT - No Weighting"
+        plot_title = f"{title} - No Weighting"
 
     for concept in config_list:
         top_concept_name = f"{top_name}/{concept}"
@@ -73,5 +74,6 @@ if __name__ == '__main__':
     commandLineParser.add_argument('--SEED', type=str, help='Range of seeds')
     commandLineParser.add_argument('--LAYER', type=str, help='Layer under consideration')
     commandLineParser.add_argument('--TOP_DIR', type=str, help='Top directory')
+    commandLineParser.add_argument('--TITLE', type=str, default="BERT", help='Plot title')
     args = commandLineParser.parse_args()
     main(args)

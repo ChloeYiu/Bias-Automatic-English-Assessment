@@ -45,6 +45,12 @@ while [ $# -gt 0 ]; do
         shift
         shift
         ;;
+        --title)
+        cmdopts="$cmdopts $1 \"$2\""
+        title=$2
+        shift
+        shift
+        ;;
     *)
     POSITIONAL+=("$1")
     shift
@@ -55,7 +61,7 @@ set -- "${POSITIONAL[@]}"
 
 if [[ $# -ne 4 ]]; then
    echo "Usage: $0 [--condaenv path] [--part_range start:end] [--seed_range start:end] [--layer_range start:end] [--class_weight weight] biasset top_outdir trainset cavset"
-   echo "  e.g: ./local/run/run_eval_all.sh LIESTdev02 est LIESTgrp06 LIESTgrp06"
+   echo "  e.g: ./local/run/run_eval_bias_all.sh LIESTdev02 est LIESTgrp06 LIESTgrp06"
    echo ""
    exit 100
 fi
@@ -102,8 +108,10 @@ for PART in $(seq $(echo $part_range | cut -d':' -f1) $(echo $part_range | cut -
         mkdir -p $(dirname "$log_file")
 
         # Run the evaluation script with arguments from JSON file
-        cmd="python local/python/eval_bias_all.py --TRAINSET $trainset --CAVSET $cavset --BIASSET $biasset --CLASS_WEIGHT $class_weight  --CONFIG_FILE $config_file --PART $PART --SEED $seeds --LAYER $LAYER --TOP_DIR $top_outdir"
-        echo $cmd
-        $cmd >& $log_file
+        if [ -n "$title" ]; then
+            python local/python/eval_bias_all.py --TRAINSET $trainset --CAVSET $cavset --BIASSET $biasset --CLASS_WEIGHT $class_weight  --CONFIG_FILE $config_file --PART $PART --SEED $seeds --LAYER $LAYER --TOP_DIR $top_outdir --TITLE "$title" >& $log_file    
+            else
+            python local/python/eval_bias_all.py --TRAINSET $trainset --CAVSET $cavset --BIASSET $biasset --CLASS_WEIGHT $class_weight  --CONFIG_FILE $config_file --PART $PART --SEED $seeds --LAYER $LAYER --TOP_DIR $top_outdir >& $log_file
+        fi
     done
 done
