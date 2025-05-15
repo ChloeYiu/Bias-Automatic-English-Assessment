@@ -220,7 +220,7 @@ class BiasAllGrad(BiasParentGrad):
         self.legend = self.extract_legend(concepts)
     
     def extract_legend(self, concept):
-        return {concept: self.config_parser[concept]['LEGEND'] for concept in self.concepts}
+        return {concept: self.config_parser[concept]['LEGEND'] for concept in self.names}
 
 class BiasCompareGrad(BiasParentGrad):
     def __init__(self, names):
