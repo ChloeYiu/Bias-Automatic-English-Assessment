@@ -20,6 +20,12 @@ while [ $# -gt 0 ]; do
         shift
         shift
         ;;
+        --title)
+        cmdopts="$cmdopts $1 $2"
+        title=$2
+        shift
+        shift
+        ;;
     *)
     POSITIONAL+=("$1")
     shift
@@ -67,7 +73,9 @@ for part in 1; do
     fi
 
     # Run the evaluation script with arguments from JSON file
-    cmd="python local/training/eval_bias_all.py --TRAINSET $trainset --CAVSET $cavset --BIASSET $testset --CLASS_WEIGHT $class_weight  --CONFIG_FILE $config_file --PART $part --SEED $seeds --LAYER input_layer --MODEL $model --TOP_DIR $top_outdir"
-    echo $cmd
-    $cmd >> $log_file 2>&1
+    if [ -n "$title" ]; then
+        python local/training/eval_bias_all.py --TRAINSET $trainset --CAVSET $cavset --BIASSET $testset --CLASS_WEIGHT $class_weight  --CONFIG_FILE $config_file --PART $part --SEED $seeds --LAYER input_layer --MODEL $model --TOP_DIR $top_outdir --TITLE "$title" >> $log_file 2>&1
+    else
+        python local/training/eval_bias_all.py --TRAINSET $trainset --CAVSET $cavset --BIASSET $testset --CLASS_WEIGHT $class_weight  --CONFIG_FILE $config_file --PART $part --SEED $seeds --LAYER input_layer --MODEL $model --TOP_DIR $top_outdir >> $log_file 2>&1
+    fi
 done

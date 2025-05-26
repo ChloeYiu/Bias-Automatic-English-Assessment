@@ -12,6 +12,7 @@ def main(args):
     part = args.PART
     seed_range = args.SEED
     model_name = args.MODEL
+    title = args.TITLE
 
     config_file = args.CONFIG_FILE  
     config_parser = configparser.ConfigParser()
@@ -27,14 +28,15 @@ def main(args):
     bias_all = BiasAllGrad(config_parser, config_list)
 
     top_name = f"{top_dir}/bias/{cav_set}/{bias_set}_bias_part{part}"
-    model_name_space = model_name.replace('_', ' ')
-
+    if not title:
+        title = f"Feature {model_name.replace('_', ' ')}"
+    
     if class_weight:
         plot_file = f"{top_name}_{layer}_{class_weight}.png"
-        plot_title = f"Feature {model_name_space} - Balanced Weighting"
+        plot_title = f"{title} - Balanced Weighting"
     else:
         plot_file = f"{top_name}_{layer}.png"
-        plot_title = f"Feature {model_name_space} - No Weighting"
+        plot_title = f"{title} - No Weighting"
 
     for concept in config_list:
         top_concept_name = f"{top_dir}/bias/{cav_set}/{concept}/{bias_set}/bias_part{part}"
@@ -79,5 +81,6 @@ if __name__ == '__main__':
     commandLineParser.add_argument('--LAYER', type=str, help='Layer under consideration')
     commandLineParser.add_argument('--TOP_DIR', type=str, help='Top directory')
     commandLineParser.add_argument('--MODEL', type=str, help='Model name (DDN vs DNN)')
+    commandLineParser.add_argument('--TITLE', type=str, default="", help='Title')
     args = commandLineParser.parse_args()
     main(args)

@@ -188,8 +188,8 @@ if __name__ == '__main__':
     # Model configuration
     parser.add_argument('--input_size', type=int, default=24, help='Input size of the model')
     parser.add_argument('--n_hidden', type=int, default=185, help='Number of hidden units')
-    parser.add_argument('--hidden_1', type=int, default=200, help='Number of hidden units')
-    parser.add_argument('--hidden_2', type=int, default=60, help='Number of hidden units')
+    parser.add_argument('--hidden_1', type=int, default=600, help='Number of hidden units')
+    parser.add_argument('--hidden_2', type=int, default=20, help='Number of hidden units')
     parser.add_argument('--dropout', type=float, default=0.5, help='Dropout rate')
     parser.add_argument('--n_hidden_layers', type=int, default=2, help='Number of hidden layers')
     parser.add_argument('--loss_fn_type', type=str, default="NLL_MVN", help='Loss function type')
