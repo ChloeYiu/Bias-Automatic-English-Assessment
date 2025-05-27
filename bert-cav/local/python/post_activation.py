@@ -8,7 +8,7 @@ torch.cuda.empty_cache()
 from path import makeDir, checkDirExists, checkFileExists
 import argparse
 
-from cav import ActivationGetter, FileGenerator, PostActivation
+from cav import FileGenerator, PostActivation
 import sys
 
 def main(args):
@@ -16,7 +16,6 @@ def main(args):
     model_paths = model_paths.split()
     activation_dir = args.ACTIVATION_DIR
     gradient_dir = args.GRADIENT_DIR
-    feature_file = args.FEATURE
     part=args.part
 
     for i, model_path in enumerate(model_paths):
@@ -50,7 +49,6 @@ if __name__ == "__main__":
     commandLineParser.add_argument('MODELS', type=str, help='trained .th models separated by space')
     commandLineParser.add_argument('ACTIVATION_DIR', type=str, help='directory to store activations')
     commandLineParser.add_argument('GRADIENT_DIR', type=str, help='directory to store gradients')
-    commandLineParser.add_argument('--FEATURE', type=str, default='', help="Specify test feature file")
     commandLineParser.add_argument('--part', type=int, default=3, help="Specify part of exam")
 
     args = commandLineParser.parse_args()
