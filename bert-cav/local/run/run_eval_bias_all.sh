@@ -70,26 +70,8 @@ biasset=$1
 top_outdir=$2
 trainset=$3
 cavset=$4
-profile=$5
 config_file=$top_outdir/arguments.conf
 seeds=1:5
-
-# Function to load configuration
-load_config() {
-    local profile=$1
-    local config_file=$2
-    eval $(awk -v profile="[$profile]" '
-    $0 == profile {found=1; next}
-    /^\[.*\]/ {found=0}
-    found && NF {gsub(/ *= */, "="); print}
-    ' $config_file)
-}
-
-# Activate conda environment
-source activate "$condaenv"
-
-# Load configuration
-load_config "$profile" "$config_file"
 
 
 for PART in $(seq $(echo $part_range | cut -d':' -f1) $(echo $part_range | cut -d':' -f2)); do
