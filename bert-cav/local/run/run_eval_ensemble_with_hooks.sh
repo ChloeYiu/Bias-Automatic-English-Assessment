@@ -45,6 +45,8 @@ while [ $# -gt 0 ]; do
 done
 set -- "${POSITIONAL[@]}"
 
+echo "Feature flag: $feature"
+
 # Check Number of Args
 if [[ $# -ne 4 ]]; then
    echo "Usage: $0 [--condaenv path] [--part_range start:end] [--biased_TSET profile] [--feature] responses_dir tset top_outdir trainset"
@@ -59,8 +61,7 @@ SRC=$1 # responses_dir
 TSET=$2
 top_outdir=$3
 trainset=$4
-
-if [ $feature ]; then
+if [ "$feature" = true ]; then
     trainset=${trainset}_feature
 fi
 
@@ -119,7 +120,7 @@ for PART in $(seq $PART_START $PART_END); do
     echo "PART=$PART"
     echo "MODELS=$MODELS"
 
-    if [ $feature ]; then
+    if [ "$feature" = true ]; then
         FEATURE=/research/milsrg1/alta/linguaskill/exp-ymy23/feature-cav/data/ALTA/ASR_V2.0.0/$TSET/f4-ppl-c2-pdf/part$PART/features.txt
         if [ ! -f "$FEATURE" ]; then
             echo "ERROR: test features not found: $FEATURE"
@@ -138,7 +139,7 @@ for PART in $(seq $PART_START $PART_END); do
     log_file=LOGs/$topdir/predictions/$TSET/preds_bert_part${PART}.LOG
     
     echo "Logging to: $log_file"
-    if [ $feature ]; then
+    if [ "$feature" = true ]; then
         python local/python/eval_ensemble_with_hooks.py $opts "$MODELS" $RESPONSES $SCORES $OUT $ACTIVATION_DIR $GRADIENT_DIR --part=$PART --B=8 --FEATURE=$FEATURE >& $log_file
     else
         python local/python/eval_ensemble_with_hooks.py $opts "$MODELS" $RESPONSES $SCORES $OUT $ACTIVATION_DIR $GRADIENT_DIR --part=$PART --B=8 >& $log_file
