@@ -65,5 +65,5 @@ local/run/run_eval_bias_multiple.sh LIESTdev02 est LIESTgrp06_feature LIESTgrp06
 local/run/run_eval_bias_multiple.sh LIESTdev02 est LIESTgrp06_feature LIESTgrp06 grade_A
 local/run/run_eval_bias_multiple.sh LIESTdev02 est LIESTgrp06_feature LIESTgrp06 grade_B2
 local/run/run_eval_bias_multiple.sh LIESTdev02 est LIESTgrp06_feature LIESTgrp06 grade_C
-local/run/run_eval_bias_all.sh LIESTdev02 est LIESTgrp06_feature LIESTgrp06
-local/run/run_eval_bias_all.sh LIESTdev02 est LIESTgrp06_feature LIESTgrp06 --class_weight balanced
+local/run/run_eval_bias_all.sh LIESTdev02 est LIESTgrp06_feature LIESTgrp06 --title "Text with Feature"
+local/run/run_eval_bias_all.sh LIESTdev02 est LIESTgrp06_feature LIESTgrp06 --class_weight balanced --title "Text with Feature"
