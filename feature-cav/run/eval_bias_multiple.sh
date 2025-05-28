@@ -84,7 +84,7 @@ for part in 1; do
     fi
 
     # Run the evaluation script with arguments from JSON file
-    cmd="python local/training/eval_bias_multiple.py --TRAINSET $trainset --CAVSET $cavset --BIASSET $testset --CLASS_WEIGHT $class_weight  --BIAS $profile --PART $part --SEED $seeds --MODEL $model --LAYER input_layer --TOP_DIR $top_outdir"
+    cmd="python local/training/eval_bias_multiple.py --TRAINSET $trainset --CAVSET $cavset --BIASSET $testset --CLASS_WEIGHT $class_weight  --BIAS $profile --PART $part --SEED $seeds --LAYER input_layer --TOP_DIR $top_outdir --MODEL $model"
     echo $cmd
     $cmd >> $log_file 2>&1
 done

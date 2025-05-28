@@ -198,7 +198,7 @@ class BiasParentGrad:
     def find_mean(self, name):
         return np.mean(np.array(self.scores_dict[name]), axis=0), np.mean(np.array(self.individual_distance_dict[name]), axis=0)
 
-    def plot_graph(self, plot_title, plot_file):
+    def plot_graph(self, plot_title, plot_file, ncol=1):
         plt.figure(figsize=(4, 8))
         plt.title(plot_title)
         plt.xlabel('Predicted Scores')
@@ -211,7 +211,7 @@ class BiasParentGrad:
             label = self.legend[concept]
             plt.scatter(scores, individual_distance, s=2, label=label)
         os.makedirs(os.path.dirname(plot_file), exist_ok=True)
-        plt.legend(markerscale=4)  # Increase the size of the dots in the legend
+        plt.legend(markerscale=4, ncol=ncol)  # Increase the size of the dots in the legend
         plt.savefig(plot_file, bbox_inches='tight')   
         
 class BiasAllGrad(BiasParentGrad):

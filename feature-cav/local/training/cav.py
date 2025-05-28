@@ -8,6 +8,7 @@ import numpy as np
 class FileGenerator:
     tmp_suffix = '.tmp'
     suffix = '.txt'
+    filtered_suffix = '.filtered'
 
     def __init__(self, model_name, dir, file_type):
         self.dir = dir
@@ -25,6 +26,9 @@ class FileGenerator:
 
     def file(self, layer_name):
         return os.path.join(self.dir, f'{self.file_prefix}{layer_name}{self.suffix}')
+
+    def filtered_file(self, layer_name):
+        return os.path.join(self.dir, f'{self.file_prefix}{layer_name}{self.filtered_suffix}')
 
     def create_dir(self, layer_names):
         os.makedirs(self.dir, exist_ok=True)
@@ -273,3 +277,33 @@ def get_targets_dict(speaker_file, target_file, target_meta, clean_speaker=False
     targets_dict = target_getter.get_targets_with_names(target_meta, set(speaker_column))
     print(f'Target dictionary obtained from {target_file}')
     return targets_dict
+
+class PostActivation:
+    def __init__(self, alpha):
+        self.alpha = alpha
+
+    def read(self, file):
+        speakers = []
+        content = []
+        with open(file, 'r') as f:
+            f.readline() # skip header
+            for line in f:
+                speaker, string = line.strip().split(' ', 1)
+                speakers.append(speaker)
+                content.append(np.array(eval(string)))
+        return speakers, np.array(content)
+
+    def filter(self, activations, gradients):
+        # Apply Leaky ReLU activation function
+        filtered_activations = np.where(activations >= 0, activations, self.alpha*activations)
+        filtered_gradients = np.where((gradients == 0) | (activations >= 0), gradients, gradients/self.alpha)
+        return filtered_activations, filtered_gradients
+
+    def save(self, file, speakers, content, header='SPEAKERID ACTIVATION'):
+        os.makedirs(os.path.dirname(file), exist_ok=True)
+        with open(file, 'w') as f:
+            f.write(header + '\n')
+            for speaker, item in zip(speakers, content):
+                f.write(f"{speaker} {str(item.tolist())}\n")
+        print(f"Saved {len(content)} items to {file}")
+    

@@ -15,6 +15,7 @@ def main(args):
     seed_range = args.SEED
     layer = args.LAYER
     plot_file = args.OUTPUT_FILE
+    model_name = args.MODEL
     
     config_file = args.CONFIG_FILE  
     config_parser = configparser.ConfigParser()
@@ -27,7 +28,7 @@ def main(args):
     top_dir = args.TOP_DIR
     print(f'Class weight: {class_weight}')
 
-    bias_multiple = BiasMultipleGrad(seed_range)
+    bias_multiple = BiasMultipleGrad(seed_range, model_name)
     graph_list = ['Unbiased', f'{biased_model_name.title()} Biased']
     bias_compare = BiasCompareGrad(graph_list)
 
@@ -73,5 +74,6 @@ if __name__ == '__main__':
     commandLineParser.add_argument('--TOP_DIR', type=str, help='Top directory')
     commandLineParser.add_argument('--OUTPUT_FILE', type=str, help='Output file')
     commandLineParser.add_argument('--CONFIG_FILE', type=str, help='Config file')
+    commandLineParser.add_argument('--MODEL', type=str, help='DDN, DNN, DDN_BERT')
     args = commandLineParser.parse_args()
     main(args)
