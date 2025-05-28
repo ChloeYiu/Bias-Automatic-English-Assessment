@@ -35,7 +35,7 @@ def main(args):
         else:
             cav_file = f"{top_dir}/cav/{cav_set}/{bias}/cav_part{part}_{seed}_dense.txt"
             distance_file = f"{top_dir}/bias/{cav_set}/{bias}/{bias_set}/bias_part{part}_{seed}_dense.txt"
-        gradient_file = f"{top_dir}/gradients/{bias_set}/gradients_part{part}_{seed}_dense.txt"
+        gradient_file = f"{top_dir}/gradients/{bias_set}/gradients_part{part}_{seed}_dense.filtered"
         pred_file = f"{top_dir}/predictions/{bias_set}/preds_wav2vec_part{part}_{seed}.txt"
         bias_evaluator = BiasGradEvaluator(gradient_file, cav_file)
         bias_plotter = BiasGradPlotter(pred_file)

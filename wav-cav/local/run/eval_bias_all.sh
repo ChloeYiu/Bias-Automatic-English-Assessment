@@ -47,7 +47,7 @@ if [ ! -f "$config_file" ]; then
     exit 1
 fi
 
-seeds="24"
+seeds="2,24"
 
 for part in 1; do
     top_outdir=eval/$trainset/part$part
