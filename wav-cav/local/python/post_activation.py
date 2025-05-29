@@ -27,7 +27,7 @@ def main(args):
     activation_filtered_file = activation_file_generator.filtered_file('dense')
     gradient_filtered_file = gradient_file_generator.filtered_file('dense')
 
-    post_activation = PostActivation(0.01)
+    post_activation = PostActivation(0)
 
     speaker, activations = post_activation.read(activation_file)
     _, gradients = post_activation.read(gradient_file)
