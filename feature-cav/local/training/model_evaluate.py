@@ -12,7 +12,7 @@ import json
 
 import yaml
 from argparse import Namespace
-from model import LitModel, LitBertModel, LitDNNModel
+from model import LitModel, LitBertModel, LitDNNModel, LitReLUModel, LitBertLeakyModel
 from utils_Fns import process_data_file
 from torch.utils.data import TensorDataset
 
@@ -80,6 +80,10 @@ def main(cfg):
         model = LitDNNModel(loaded_cfg)
     elif model_type == 'DDN_BERT':
         model = LitBertModel(loaded_cfg)
+    elif model_type == 'DDN_LBERT':
+        model = LitBertLeakyModel(loaded_cfg)
+    elif model_type == 'DDN_ReLU':
+        model = LitReLUModel(loaded_cfg)
     else:
         model = LitModel(loaded_cfg)
     model_name = "_".join(Path(cfg.model_dir).parts[-2:])

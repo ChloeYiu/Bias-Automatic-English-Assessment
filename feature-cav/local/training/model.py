@@ -300,6 +300,71 @@ class LitBertModel(LitModel):
         del self.n_hidden
         del self.n_hidden_layers
 
+    def forward(self, x):
+        x = F.relu(self.input_layer(x))
+        x = self.Dropout(x)
+
+        # Forward pass through hidden layers with dropout
+        for layer in self.hidden_layers:
+            x = layer(x)
+        # Forward pass through output layer, just linear with 1d output for regression
+        x = self.output_layer(x)
+        return x
+
+
+class LitBertLeakyModel(LitModel):
+    def __init__(self, cfg):
+        super().__init__(cfg)
+
+        self.input_size = cfg.input_size
+        self.hidden_1 = cfg.hidden_1
+        self.hidden_2 = cfg.hidden_2
+        self.dropout = cfg.dropout
+
+        self.input_layer = nn.Linear(self.input_size, self.hidden_1)
+        self.hidden_layers = nn.ModuleList([nn.Sequential(
+                nn.Linear(self.hidden_1, self.hidden_2),
+                nn.LeakyReLU())])
+
+        # Output layer
+        self.output_layer = nn.Linear(self.hidden_2, 2)
+
+        del self.n_hidden
+        del self.n_hidden_layers
+
+class LitReLUModel(LitModel):
+    def __init__(self, cfg):
+        super().__init__(cfg)
+
+        self.input_size = cfg.input_size
+        self.n_hidden = cfg.n_hidden
+        self.dropout = cfg.dropout
+        self.n_hidden_layers = cfg.n_hidden_layers
+
+
+        self.input_layer = nn.Linear(self.input_size, self.n_hidden)
+        self.Dropout = nn.Dropout(p=self.dropout)
+
+        #torch.nn.GELU
+        self.hidden_layers = nn.ModuleList([nn.Sequential(
+                nn.Linear(self.n_hidden, self.n_hidden),
+                nn.ReLU(),
+                nn.Dropout(p=self.dropout)) for _ in range(self.n_hidden_layers)])
+
+        # Output layer
+        self.output_layer = nn.Linear(self.n_hidden, 2)
+
+    def forward(self, x):
+        x = F.relu(self.input_layer(x))
+        x = self.Dropout(x)
+
+        # Forward pass through hidden layers with dropout
+        for layer in self.hidden_layers:
+            x = layer(x)
+        # Forward pass through output layer, just linear with 1d output for regression
+        x = self.output_layer(x)
+        return x
+
 class LitDNNModel(LitModel):
     def __init__(self, cfg):
         super().__init__(cfg)

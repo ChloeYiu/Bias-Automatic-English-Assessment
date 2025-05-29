@@ -14,7 +14,7 @@ from torch.utils.data import TensorDataset, DataLoader
 import lightning as pl
 from lightning.pytorch.callbacks import ModelCheckpoint, EarlyStopping
 from lightning.pytorch import loggers as pl_loggers
-from model import LitModel, LitBertModel, LitDNNModel, LogToFileCallback
+from model import LitModel, LitBertModel, LitDNNModel, LitReLUModel, LogToFileCallback, LitBertLeakyModel
 from utils_Fns import process_data_file
 
 
@@ -88,6 +88,12 @@ def Trainer(cfg):
     if model_type=="DDN_BERT":
         print("Using DDN BERT model")
         model = LitBertModel(cfg)
+    elif model_type=="DDN_ReLU":
+        print("Using DDN ReLU model")
+        model = LitReLUModel(cfg)
+    elif model_type=="DDN_LBERT":
+        print("Using DDN L-BERT model")
+        model = LitBertLeakyModel(cfg)
     elif model_type=="DNN":
         print("Using DNN model")
         model = LitDNNModel(cfg)

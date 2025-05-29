@@ -74,6 +74,6 @@ if __name__ == '__main__':
     commandLineParser.add_argument('--TOP_DIR', type=str, help='Top directory')
     commandLineParser.add_argument('--OUTPUT_FILE', type=str, help='Output file')
     commandLineParser.add_argument('--CONFIG_FILE', type=str, help='Config file')
-    commandLineParser.add_argument('--MODEL', type=str, help='DDN, DNN, DDN_BERT')
+    commandLineParser.add_argument('--MODEL', type=str, help='DDN, DNN, DDN_BERT, DDN_ReLU, DDN_LBERT')
     args = commandLineParser.parse_args()
     main(args)
