@@ -11,6 +11,7 @@ condaenv=/scratches/dialfs/kmk/anaconda3/envs/whisper39
 PART_START=1
 PART_END=5
 
+activation_fn="relu" # Default activation function
 feature=false
 
 # look for optional arguments
@@ -35,6 +36,11 @@ while [ $# -gt 0 ]; do
         ;; --feature)
         cmdopts="$cmdopts $1"
         feature=true
+        shift
+        ;;
+        --lrelu)
+        cmdopts="$cmdopts $1"
+        activation_fn=lrelu
         shift
         ;;
     *)
@@ -63,6 +69,8 @@ top_outdir=$3
 trainset=$4
 if [ "$feature" = true ]; then
     trainset=${trainset}_feature
+elif ["$activation_fn" = "lrelu" ]; then
+    trainset=${trainset}_lrelu
 fi
 
 # check files exist
@@ -142,7 +150,7 @@ for PART in $(seq $PART_START $PART_END); do
     if [ "$feature" = true ]; then
         python local/python/eval_ensemble_with_hooks.py $opts "$MODELS" $RESPONSES $SCORES $OUT $ACTIVATION_DIR $GRADIENT_DIR --part=$PART --B=8 --FEATURE=$FEATURE >& $log_file
     else
-        python local/python/eval_ensemble_with_hooks.py $opts "$MODELS" $RESPONSES $SCORES $OUT $ACTIVATION_DIR $GRADIENT_DIR --part=$PART --B=8 >& $log_file
+        python local/python/eval_ensemble_with_hooks.py $opts "$MODELS" $RESPONSES $SCORES $OUT $ACTIVATION_DIR $GRADIENT_DIR --activation_fn=$activation_fn --part=$PART --B=8 >& $log_file
     fi
     echo "Hook done"
 done

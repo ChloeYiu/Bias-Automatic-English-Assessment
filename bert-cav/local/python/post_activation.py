@@ -19,10 +19,13 @@ def main(args):
     part=args.part
 
     for i, model_path in enumerate(model_paths):
-        print('model_path ' + model_path)
+        print('model_path: ' + model_path)
         checkFileExists(model_path)
 
         model_name = os.path.splitext(os.path.basename(model_paths[i]))[0]
+        model_group = model_path.split('/')[1]
+        print('model_group: ' + model_group)
+        print('model_name: ' + model_name)
 
         activation_file_generator = FileGenerator(model_name, activation_dir, 'activations')
         gradient_file_generator = FileGenerator(model_name, gradient_dir, 'gradients')
@@ -33,7 +36,7 @@ def main(args):
         activation_filtered_file = activation_file_generator.filtered_file(1)
         gradient_filtered_file = gradient_file_generator.filtered_file(1)
 
-        post_activation = PostActivation(0)
+        post_activation = PostActivation(0.01) if model_group.endswith('_lrelu') else PostActivation(0)
 
         speaker, activations = post_activation.read(activation_file)
         _, gradients = post_activation.read(gradient_file)

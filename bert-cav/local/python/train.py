@@ -8,7 +8,7 @@ import sys
 import os
 import argparse
 from tools import AverageMeter, get_default_device
-from models import BERTGrader, BERTFeatureGrader
+from models import BERTGrader, BERTFeatureGrader, BERTLReLUGrader
 
 def makeDir (name, mustBeNew):
     try:
@@ -92,6 +92,7 @@ if __name__ == "__main__":
     commandLineParser.add_argument('--RESPONSES', type=str, help='responses text file')
     commandLineParser.add_argument('--GRADES', type=str, help='scores text file')
     commandLineParser.add_argument('--FEATURE', type=str, default='', help='feature text file')
+    commandLineParser.add_argument('--activation_fn', type=str, default="relu", help="Use LeakyReLU in the model")
     commandLineParser.add_argument('--B', type=int, default=16, help="Specify batch size")
     commandLineParser.add_argument('--epochs', type=int, default=3, help="Specify epochs")
     commandLineParser.add_argument('--lr', type=float, default=0.00001, help="Specify learning rate")
@@ -115,7 +116,7 @@ if __name__ == "__main__":
     part = args.part
     val_size = args.val_size
     feature_size = args.feature_size
-
+    activation_fn = args.activation_fn
 
     torch.manual_seed(seed)
 
@@ -154,7 +155,15 @@ if __name__ == "__main__":
     val_dl = DataLoader(val_ds, batch_size=batch_size)
 
     # initialise grader
-    model = BERTFeatureGrader(feature_size=feature_size) if feature_file else BERTGrader()
+    if feature_file:
+        print("Using BERTFeatureGrader with feature size:", feature_size)
+        model = BERTFeatureGrader(feature_size=feature_size)
+    elif activation_fn == "lrelu":
+        print("Using BERTLReLUGrader")
+        model = BERTLReLUGrader()
+    else:
+        print("Using BERTGrader")
+        model = BERTGrader()
     model.to(device)
 
     # Optimizer

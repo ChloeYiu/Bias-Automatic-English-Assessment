@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader
 from data_prep import get_data, get_mask_with_feature
 import argparse
 from tools import AverageMeter, get_default_device, calculate_rmse, calculate_pcc, calculate_less1, calculate_less05, calculate_avg, calculate_src, calculate_krc
-from models import BERTGrader, BERTFeatureGrader
+from models import BERTGrader, BERTFeatureGrader, BERTLReLUGrader
 import statistics
 
 from path import makeDir, checkDirExists, checkFileExists
@@ -123,6 +123,7 @@ def main(args):
     batch_size = args.B
     part=args.part
     feature_size = args.feature_size
+    activation_fn = args.activation_fn
 
     for model_path in model_paths:
         print('model_path ' + model_path)
@@ -152,7 +153,15 @@ def main(args):
     # Load the models
     models = []
     for model_path in model_paths:
-        model = BERTFeatureGrader(feature_size=feature_size) if feature_file else BERTGrader()
+        if feature_file:
+            print("Loading model with features")
+            model = BERTFeatureGrader(feature_size=feature_size)
+        elif activation_fn == 'lrelu':
+            print("Loading model with LReLU activation")
+            model = BERTLReLUGrader()
+        else:
+            print("Loading model without features")
+            model = BERTGrader()
         model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
         model.to(device)
         models.append(model)
@@ -242,6 +251,7 @@ if __name__ == "__main__":
     commandLineParser.add_argument('GRADIENT_DIR', type=str, help='directory to store gradients')
     commandLineParser.add_argument('--B', type=int, default=16, help="Specify batch size")
     commandLineParser.add_argument('--FEATURE', type=str, default='', help="Specify test feature file")
+    commandLineParser.add_argument('--activation_fn', type=str, default='relu', help="Specify test feature file")
     commandLineParser.add_argument('--part', type=int, default=3, help="Specify part of exam")
     commandLineParser.add_argument('--feature_size', type=int, default=356, help="Specify feature size")
 
