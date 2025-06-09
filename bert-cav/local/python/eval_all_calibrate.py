@@ -21,14 +21,16 @@ def get_single_stats(all_preds, targets):
     srcs = []
     krcs = []
 
-    for preds in all_preds:
-        rmses.append(calculate_rmse(torch.FloatTensor(preds), torch.FloatTensor(targets)).item())
-        pccs.append(calculate_pcc(torch.FloatTensor(preds), torch.FloatTensor(targets)).item())
-        avgs.append(calculate_avg(torch.FloatTensor(preds)).item())
-        less05s.append(calculate_less05(torch.FloatTensor(preds), torch.FloatTensor(targets)))
-        less1s.append(calculate_less1(torch.FloatTensor(preds), torch.FloatTensor(targets)))
-        srcs.append(calculate_src(torch.FloatTensor(preds), torch.FloatTensor(targets)).item())
-        krcs.append(calculate_krc(torch.FloatTensor(preds), torch.FloatTensor(targets)).item())
+    preds_torch = torch.FloatTensor(all_preds)
+    targets_torch = torch.FloatTensor(targets)
+
+    rmses.append(calculate_rmse(preds_torch, targets_torch).item())
+    pccs.append(calculate_pcc(preds_torch, targets_torch).item())
+    avgs.append(calculate_avg(preds_torch).item())
+    less05s.append(calculate_less05(preds_torch, targets_torch))
+    less1s.append(calculate_less1(preds_torch, targets_torch))
+    srcs.append(calculate_src(preds_torch, targets_torch).item())
+    krcs.append(calculate_krc(preds_torch, targets_torch).item())
 
     rmse_mean = statistics.mean(rmses)
     rmse_std = statistics.pstdev(rmses)
@@ -128,8 +130,6 @@ def main (args):
 
         # Get single stats (over all models)
     rmse_mean, rmse_std, pcc_mean, pcc_std, avg_mean, avg_std, less05_mean, less05_std, less1_mean, less1_std, src_mean, src_std, krc_mean, krc_std = get_single_stats(preds, refs)
-    print("STATS FOR ", model_paths)
-    print()
     print("\nOVERALL SINGLE STATS\n")
     print("RMSE: "+str(rmse_mean)+" +- "+str(rmse_std))
     print("PCC: "+str(pcc_mean)+" +- "+str(pcc_std))

@@ -128,9 +128,15 @@ echo "PREDS=$PREDS"
 GRADIENT=`awk '{if($1~"gradient:") print $2;}' $CAL`
 INTERCEPT=`awk '{if($1~"intercept:") print $2;}' $CAL`
 
+echo "GRADIENT=$GRADIENT"
+echo "INTERCEPT=$INTERCEPT"
+
 # Pass the values to the next Python script
 OUT2=${PREDS_DIR}/ensemble_cal_${PREDS_TSET}.txt
 echo "OUT_PRED=$OUT2"
+
+echo "Logging to $LOG_DIR/eval_all_calibrate_all.LOG"
+
 python ./local/python/eval_all_calibrate.py "$PREDS" $OUT2 --gradient=$GRADIENT --intercept=$INTERCEPT >& $LOG_DIR/eval_all_calibrate_all.LOG
 
 
