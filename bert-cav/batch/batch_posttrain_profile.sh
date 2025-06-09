@@ -6,8 +6,8 @@ ARGS="$@"
 
 profile=$1
 
-#local/run/run_eval_ensemble_with_hooks.sh --biased_TSET $profile --part_range 1:1 /data/milsrg1/alta/linguaskill/relevance_v2/LIESTgrp06 LIESTgrp06 est LIESTgrp06_$profile
-# local/run/run_eval_ensemble_with_hooks.sh --part_range 1:1 /data/milsrg1/alta/linguaskill/relevance_v2/LIESTdev02 LIESTdev02 est LIESTgrp06_$profile
+local/run/run_eval_ensemble_with_hooks.sh --biased_TSET $profile --part_range 1:1 /data/milsrg1/alta/linguaskill/relevance_v2/LIESTgrp06 LIESTgrp06 est LIESTgrp06_$profile
+local/run/run_eval_ensemble_with_hooks.sh --part_range 1:1 /data/milsrg1/alta/linguaskill/relevance_v2/LIESTdev02 LIESTdev02 est LIESTgrp06_$profile
 local/run/run_post_activation.sh --part_range 1:1 LIESTgrp06_$profile est LIESTgrp06_$profile
 local/run/run_post_activation.sh --part_range 1:1 LIESTdev02 est LIESTgrp06_$profile
 local/run/run_extract_cav.sh LIESTgrp06_$profile est LIESTgrp06_$profile $profile
