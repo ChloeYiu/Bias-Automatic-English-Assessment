@@ -91,3 +91,20 @@ class BERTFeatureGrader(BERTGrader):
         h2 = self.layer2(h1).clamp(min=0)
         y = self.layer3(h2).squeeze(dim=-1)
         return y
+
+class BERTLReLUGrader(BERTGrader):
+    def forward(self, input_ids, attention_mask):
+        output = self.encoder(input_ids, attention_mask)
+        word_embeddings = output.last_hidden_state
+
+        head1 = self._apply_attn(word_embeddings, attention_mask, self.attn1)
+        head2 = self._apply_attn(word_embeddings, attention_mask, self.attn2)
+        head3 = self._apply_attn(word_embeddings, attention_mask, self.attn3)
+        head4 = self._apply_attn(word_embeddings, attention_mask, self.attn4)
+
+        all_heads = torch.cat((head1, head2, head3, head4), dim=1)
+
+        h1 = torch.nn.functional.leaky_relu(self.layer1(all_heads), negative_slope=0.01)
+        h2 = torch.nn.functional.leaky_relu(self.layer2(h1), negative_slope=0.01)
+        y = self.layer3(h2).squeeze(dim=-1)
+        return y

@@ -102,7 +102,7 @@ for PART in $(seq $(echo $part_range | cut -d':' -f1) $(echo $part_range | cut -
             mkdir -p $(dirname "$log_file")
 
             # Run the evaluation script with arguments from JSON file
-            cmd="python local/python/eval_cav.py --TARGET_FILE $TARGET_FILE --ACTIVATION_FILE $activation_base_name.txt --CAV_FILE $cav_base_name.txt --SPEAKER_COLUMN $SPEAKER_COLUMN --TARGET_COLUMN $TARGET_COLUMN --SPEAKER_INDEX $SPEAKER_INDEX --TARGET_INDEX $TARGET_INDEX --TARGET_POSITIVE $TARGET_POSITIVE --TARGET_TO_REMOVE $TARGET_TO_REMOVE --OUTPUT $log_base_name.txt"
+            cmd="python local/python/eval_cav.py --TARGET_FILE $TARGET_FILE --ACTIVATION_FILE $activation_base_name.filtered --CAV_FILE $cav_base_name.txt --SPEAKER_COLUMN $SPEAKER_COLUMN --TARGET_COLUMN $TARGET_COLUMN --SPEAKER_INDEX $SPEAKER_INDEX --TARGET_INDEX $TARGET_INDEX --TARGET_POSITIVE $TARGET_POSITIVE --TARGET_TO_REMOVE $TARGET_TO_REMOVE --OUTPUT $log_base_name.txt"
             echo $cmd
             $cmd >& $log_file
         done

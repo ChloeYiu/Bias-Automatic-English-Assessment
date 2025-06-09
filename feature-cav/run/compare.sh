@@ -29,7 +29,7 @@ done
 set -- "${POSITIONAL[@]}"
 
 if [ $# -lt 4 ]; then
-  echo "Usage: $0 <trainset> <testset> <biasmodel> <feature>"
+  echo "Usage: $0 <trainset> <testset> <biasmodel> <feature> <model>"
   exit 1
 fi
 
@@ -37,6 +37,8 @@ trainset=$1
 testset=$2
 biasmodel=$3
 feature=$4
+model=$5
+echo "Model: $model"
 config_file=arguments.conf
 
 # Check if config file exists
@@ -45,7 +47,7 @@ if [ ! -f "$config_file" ]; then
     exit 1
 fi
 
-top_outdir=DDN/ALTA/ASR_V2.0.0
+top_outdir=$model/ALTA/ASR_V2.0.0
 seeds="10:90"
 
 
@@ -72,7 +74,7 @@ for part in 1; do
     fi
 
     # Run the evaluation script with arguments from JSON file
-    cmd="python local/training/compare.py --TRAINSET $trainset --BIASSET $testset --CLASS_WEIGHT $class_weight  --BIASMODEL $biasmodel --FEATURE $feature --PART $part --SEED $seeds --LAYER input_layer --TOP_DIR $top_outdir --OUTPUT_FILE $output_file --CONFIG_FILE $config_file"
+    cmd="python local/training/compare.py --TRAINSET $trainset --BIASSET $testset --CLASS_WEIGHT $class_weight  --BIASMODEL $biasmodel --FEATURE $feature --PART $part --SEED $seeds --LAYER input_layer --TOP_DIR $top_outdir --OUTPUT_FILE $output_file --CONFIG_FILE $config_file --MODEL $model"
     echo $cmd
     $cmd >> $log_file 2>&1
 done

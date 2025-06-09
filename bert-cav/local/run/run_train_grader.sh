@@ -10,6 +10,10 @@ cmdopts=""
 part_range="1:1"   # Default part range
 seed_range="1:10"  # Default seed range
 HTE=lib/htesystem/HTE-volta.system # Default env file for sungrid queue
+
+activation_fn="relu" # Default activation function
+feature=false
+
 # look for optional arguments
 while [ $# -gt 0 ]; do
     key=$1
@@ -37,9 +41,14 @@ while [ $# -gt 0 ]; do
     shift
         ;;
         --feature)
-        cmdopts="$cmdopts $1 $2"
-        feature=$2
+        cmdopts="$cmdopts $1"
+        feature=true
     shift
+    shift
+        ;;
+        --lrelu)
+        cmdopts="$cmdopts $1"
+        activation_fn=lrelu
     shift
         ;;
 
@@ -52,11 +61,13 @@ while [ $# -gt 0 ]; do
 done
 set -- "${POSITIONAL[@]}"
 
+echo "activation function: $activation_fn"
 
 if [[ $# -lt 3 || $# -gt 4 ]]; then
    echo "Usage: $0 [--hte] [--condaenv path] [--part_range start:end] [--seed_range start:end] responses_dir tset top_outputdir [jwait]"
    echo "  e.g: $0 --part_range 1:5 --seed_range 1:10 /scratches/dialfs/alta/linguaskill/grd-graphemic-st941/neural-text/Wspt-D3/data/LIESTtrn04 LIESTtrn04 predictions/Wspt-D3"
    echo "  e.g: $0 --part_range 1:1 --seed_range 1:5 /data/milsrg1/alta/linguaskill/relevance_v2/LIESTgrp06 LIESTgrp06 est --feature /research/milsrg1/alta/linguaskill/exp-ymy23/feature-cav/data/ALTA/ASR_V2.0.0/LIESTgrp06/f4-ppl-c2-pdf"
+   echo "  e.g: $0 --part_range 1:1 --seed_range 1:5 /data/milsrg1/alta/linguaskill/relevance_v2/LIESTgrp06 LIESTgrp06 est --lrelu"
    echo ""
    exit 100
 fi
@@ -102,18 +113,20 @@ echo "seed_range: $seed_range"
 
 for PART in $(seq $(echo $part_range | cut -d':' -f1) $(echo $part_range | cut -d':' -f2)); do
     mkdir -p $top_outdir/${TSET}/trained_models/part${PART}
-    if [ -n $feature ]; then
+    if [ "$feature" = true ]; then
         log_dir=LOGs/$top_outdir/${TSET}_feature/part${PART}
+    elif [ $activation_fn == 'lrelu' ]; then
+        log_dir=LOGs/$top_outdir/${TSET}_lrelu/part${PART}
     else
         log_dir=LOGs/$top_outdir/${TSET}/part${PART}
     fi
     mkdir -p $log_dir
     for SEED in $(seq $(echo $seed_range | cut -d':' -f1) $(echo $seed_range | cut -d':' -f2)); do
 
-        if [ -n $feature ]; then
+        if [ "$feature" = true ]; then
             cmdopts="$SRC $TSET $top_outdir $PART $SEED --feature_dir $feature"
         else
-            cmdopts="$SRC $TSET $top_outdir $PART $SEED"
+            cmdopts="$SRC $TSET $top_outdir $PART $SEED --activation_fn $activation_fn"
         fi
         
         OUT=$top_outdir/${TSET}/trained_models/part${PART}/bert_part${PART}_seed${SEED}.th

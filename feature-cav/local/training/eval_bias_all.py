@@ -65,7 +65,7 @@ def main(args):
             distance = distance_reader.read_distance('DISTANCE')
             bias_all.add(concept, raw_score, distance)
 
-    bias_all.plot_graph(plot_title, plot_file)
+    bias_all.plot_graph(plot_title, plot_file, ncol=2)
     print(f'Graph saved in {plot_file}')
 
 

@@ -4,13 +4,13 @@
 ALLARGS="$0 $@"
 ARGS="$@"
 
-profile=$1
-
-local/run/predict_with_hook.sh LIESTgrp06 LIESTgrp06 --biased_train $profile --biased_test $profile
-local/run/predict_with_hook.sh LIESTgrp06 LIESTdev02 --biased_train $profile
-local/run/extract_cav.sh LIESTgrp06_$profile LIESTgrp06_$profile $profile
-local/run/extract_cav.sh LIESTgrp06_$profile LIESTgrp06_$profile $profile --class_weight balanced
-local/run/eval_bias_multiple.sh LIESTgrp06_$profile LIESTgrp06_$profile LIESTdev02 $profile
-local/run/eval_bias_multiple.sh LIESTgrp06_$profile LIESTgrp06_$profile LIESTdev02 $profile --class_weight balanced
-local/run/compare.sh LIESTgrp06 LIESTdev02 $profile $profile
-local/run/compare.sh LIESTgrp06 LIESTdev02 $profile $profile --class_weight balanced
+# local/run/predict_with_hook.sh LIESTgrp06 LIESTgrp06 
+# local/run/predict_with_hook.sh LIESTgrp06 LIESTdev02
+local/run/post_activation.sh LIESTgrp06 LIESTgrp06
+local/run/post_activation.sh LIESTgrp06 LIESTdev02
+batch/batch_extract_cav.sh 
+batch/batch_eval_cav.sh 
+batch/batch_eval_cav_mean_std.sh 
+batch/batch_eval_bias_multiple.sh 
+local/run/eval_bias_all.sh LIESTgrp06 LIESTgrp06 LIESTdev02 
+local/run/eval_bias_all.sh LIESTgrp06 LIESTgrp06 LIESTdev02 --class_weight balanced

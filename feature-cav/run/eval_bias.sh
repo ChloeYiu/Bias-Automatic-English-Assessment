@@ -82,7 +82,7 @@ for part in 1; do
         log_base_name=$top_outdir/bias/$cavset/$profile/$testset/bias_part${part}_DDN_${seed}_input_layer
     fi
     plot_file=$log_base_name.png
-    grad_file=$top_outdir/gradients/$testset/gradients_part${part}_DDN_${seed}_input_layer.txt
+    grad_file=$top_outdir/gradients/$testset/gradients_part${part}_DDN_${seed}_input_layer.filtered
     pred_file=$top_outdir/f4-ppl-c2-pdf/part${part}/DDN_${seed}/$testset/${testset}_pred_ref.txt
     log_file="Logs/$log_base_name.LOG"
 

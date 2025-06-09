@@ -78,7 +78,7 @@ for PART in $(seq $(echo $part_range | cut -d':' -f1) $(echo $part_range | cut -
                 log_base_name=$top_outdir/$trainset/bias/$cavset/$biasset/part${PART}/${profile}/bias_bert_part${PART}_seed${SEED}_layer${LAYER}
             fi
             plot_file=$log_base_name.png
-            grad_file=$top_outdir/$trainset/gradients/$biasset/part${PART}/gradients_bert_part${PART}_seed${SEED}_layer${LAYER}.txt
+            grad_file=$top_outdir/$trainset/gradients/$biasset/part${PART}/gradients_bert_part${PART}_seed${SEED}_layer${LAYER}.filtered
             pred_file=$top_outdir/$trainset/predictions/$biasset/part${PART}/preds_bert_part${PART}_seed${SEED}.txt
             log_file="LOGs/$log_base_name.LOG"
 

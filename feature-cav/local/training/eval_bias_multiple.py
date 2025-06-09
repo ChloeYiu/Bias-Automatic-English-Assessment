@@ -36,7 +36,7 @@ def main(args):
         else:
             cav_file = f"{top_dir}/cav/{cav_set}/{bias}/cav_part{part}_{seed}_input_layer.txt"
             distance_file = f"{top_dir}/bias/{cav_set}/{bias}/{bias_set}/bias_part{part}_{seed}_input_layer.txt"
-        gradient_file = f"{top_dir}/gradients/{bias_set}/gradients_part{part}_{seed}_input_layer.txt"
+        gradient_file = f"{top_dir}/gradients/{bias_set}/gradients_part{part}_{seed}_input_layer.filtered"
 
         if model_name.startswith('DNN'):
             pred_file = f"{top_dir}/f4-ppl-c2-pdf/part{part}/{seed}/{bias_set}/{bias_set}_pred.txt"

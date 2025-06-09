@@ -33,7 +33,7 @@ def main(args):
         else:
             cav_file = f"{top_dir}/{train_set}/cav/{cav_set}/part{part}/{bias}/cav_bert_part{part}_{seed}_layer{layer}.txt"
             distance_file = f"{top_dir}/{train_set}/bias/{cav_set}/{bias_set}/part{part}/{bias}/bias_bert_part{part}_{seed}_layer{layer}.txt"
-        gradient_file = f"{top_dir}/{train_set}/gradients/{bias_set}/part{part}/gradients_bert_part{part}_{seed}_layer{layer}.txt"
+        gradient_file = f"{top_dir}/{train_set}/gradients/{bias_set}/part{part}/gradients_bert_part{part}_{seed}_layer{layer}.filtered"
         pred_file = f"{top_dir}/{train_set}/predictions/{bias_set}/part{part}/preds_bert_part{part}_{seed}.txt"
 
         bias_evaluator = BiasGradEvaluator(gradient_file, cav_file)

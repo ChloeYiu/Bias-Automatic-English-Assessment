@@ -13,6 +13,7 @@ ALLARGS="$0 $@"
 
 export PATH="/scratches/dialfs/kmk/anaconda3/envs/whisper39/bin:$PATH"
 condaenv=/scratches/dialfs/kmk/anaconda3/envs/whisper39/
+activation_fn="relu" # Default activation function
 
 # look for optional arguments
 while [ $# -gt 0 ]; do
@@ -26,6 +27,11 @@ while [ $# -gt 0 ]; do
         --feature_dir)
 	shift
         feature_dir=$1
+	shift
+        ;; 
+        --activation_fn)
+	shift
+        activation_fn=$1
 	shift
         ;; 
         *)
@@ -95,11 +101,19 @@ mkdir -p $top_outdir/${TSET}/trained_models/part${PART}
 echo "PART=$PART, SEED=$SEED"
 if [ -n "$feature_dir" ]; then
     OUT=$top_outdir/${TSET}_feature/trained_models/part${PART}/bert_part${PART}_seed${SEED}.th
-else
-    OUT=$top_outdir/${TSET}/trained_models/part${PART}/bert_part${PART}_seed${SEED}.th
+    echo OUT=$OUT
+    echo python local/python/train.py $opts --OUT=$OUT --RESPONSES=$RESPONSES --GRADES=$SCORES --seed=$SEED --part=$PART --FEATURE=$FEATURE --activation_fn=$activation_fn 
+    python local/python/train.py $opts  --OUT=$OUT --RESPONSES=$RESPONSES --GRADES=$SCORES --seed=$SEED --part=$PART --FEATURE=$FEATURE --activation_fn=$activation_fn  --B=8 --epochs=2 --sch=1
+else 
+    if [ "$activation_fn" = "lrelu" ]; then
+        OUT=$top_outdir/${TSET}_lrelu/trained_models/part${PART}/bert_part${PART}_seed${SEED}.th
+        echo OUT=$OUT
+    else 
+        OUT=$top_outdir/${TSET}/trained_models/part${PART}/bert_part${PART}_seed${SEED}.th
+        echo OUT=$OUT
+    fi
+    echo python local/python/train.py $opts --OUT=$OUT --RESPONSES=$RESPONSES --GRADES=$SCORES --seed=$SEED --part=$PART --activation_fn=$activation_fn 
+    python local/python/train.py $opts  --OUT=$OUT --RESPONSES=$RESPONSES --GRADES=$SCORES --seed=$SEED --part=$PART --activation_fn=$activation_fn  --B=8 --epochs=2 --sch=1 
 fi
 
-echo OUT=$OUT
 
-echo python local/python/train.py $opts --OUT=$OUT --RESPONSES=$RESPONSES --GRADES=$SCORES --seed=$SEED --part=$PART --FEATURE=$FEATURE
-python local/python/train.py $opts  --OUT=$OUT --RESPONSES=$RESPONSES --GRADES=$SCORES --seed=$SEED --part=$PART --FEATURE=$FEATURE --B=8 --epochs=2 --sch=1
