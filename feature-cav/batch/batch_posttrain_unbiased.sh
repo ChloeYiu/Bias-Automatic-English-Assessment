@@ -7,7 +7,7 @@ ARGS="$@"
 model=$1
 
 run/evaluate.sh LIESTgrp06 LIESTgrp06 $model
-# run/evaluate.sh LIESTgrp06 LIESTdev02 $model
+run/evaluate.sh LIESTgrp06 LIESTdev02 $model
 run/evaluate.sh LIESTgrp06 LIESTcal01 $model
 run/post_activation.sh LIESTgrp06 LIESTgrp06 $model
 run/post_activation.sh LIESTgrp06 LIESTdev02 $model

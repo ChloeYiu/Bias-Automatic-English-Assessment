@@ -4,8 +4,8 @@
 ALLARGS="$0 $@"
 ARGS="$@"
 
-# local/run/predict_with_hook.sh LIESTgrp06 LIESTgrp06 
-# local/run/predict_with_hook.sh LIESTgrp06 LIESTdev02
+local/run/predict_with_hook.sh LIESTgrp06 LIESTgrp06 
+local/run/predict_with_hook.sh LIESTgrp06 LIESTdev02
 local/run/post_activation.sh LIESTgrp06 LIESTgrp06
 local/run/post_activation.sh LIESTgrp06 LIESTdev02
 batch/batch_extract_cav.sh 
